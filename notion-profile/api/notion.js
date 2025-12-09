@@ -24,18 +24,18 @@ async function getProfiles() {
     const props = page.properties;
     return {
       id: page.id,
-      bigImg: getFileUrl(props.bigImg),
-      topCircle: getFileUrl(props.topCircle),
-      smallImg: getFileUrl(props.smallImg),
-      gothicTitle: getRichText(props.gothicTitle),
-      gothicSub: getRichText(props.gothicSub),
-      pillText: getRichText(props.pillText),
-      charDesc: getRichText(props.charDesc),
-      charType: getRichText(props.charType),
-      charElement: getRichText(props.charElement),
-      charOrigin: getRichText(props.charOrigin),
-      shapeColor: getRichText(props.shapeColor) || '#ffffff',
-      isFlipped: props.isFlipped?.checkbox || false,
+      bigImg: getFileUrl(props.big_img),
+      topCircle: getFileUrl(props.top_circle),
+      smallImg: getFileUrl(props.small_img),
+      gothicTitle: getRichText(props.gothic_title),
+      gothicSub: getRichText(props.gothic_sub),
+      pillText: getRichText(props.pill_text),
+      charDesc: getRichText(props.char_desc),
+      charType: getRichText(props.char_type),
+      charElement: getRichText(props.char_element),
+      charOrigin: getRichText(props.char_origin),
+      shapeColor: getRichText(props.shape_color) || '#ffffff',
+      isFlipped: props.is_flipped?.checkbox || false,
     };
   });
 }
@@ -59,7 +59,7 @@ async function getPosts() {
       tags: props.tags?.multi_select?.map((tag) => tag.name) || [],
       likes: props.likes?.number || 0,
       comments: props.comments?.number || 0,
-      profileId: props.profileId?.relation?.[0]?.id || null,
+      profileId: props.profile_id?.relation?.[0]?.id || null,
     };
   });
 }
@@ -94,8 +94,8 @@ async function getBgm() {
       id: page.id,
       title: getTitle(props.title),
       artist: getRichText(props.artist),
-      url: getFileUrl(props.url) || getRichText(props.urlText),
-      profileId: props.profileId?.relation?.[0]?.id || null,
+      url: getFileUrl(props.url) || getRichText(props.url_text),
+      profileId: props.profile_id?.relation?.[0]?.id || null,
     };
   });
 }

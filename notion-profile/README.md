@@ -43,18 +43,18 @@ git push -u origin main
 | Property | Type | 설명 |
 |----------|------|------|
 | `order` | Number | 정렬 순서 (1, 2...) |
-| `bigImg` | Files & media | 배경 이미지 |
-| `topCircle` | Files & media | 원형 프로필 이미지 |
-| `smallImg` | Files & media | 스왑용 작은 이미지 |
-| `gothicTitle` | Rich text | 메인 타이틀 (고딕체) |
-| `gothicSub` | Rich text | 서브 타이틀 |
-| `pillText` | Rich text | 상단 태그 텍스트 (HTML 가능) |
-| `charDesc` | Rich text | 캐릭터 설명 |
-| `charType` | Rich text | 타입 |
-| `charElement` | Rich text | 엘리먼트 |
-| `charOrigin` | Rich text | 출신 |
-| `shapeColor` | Rich text | 배경 색상 (#ffffff) |
-| `isFlipped` | Checkbox | 좌우 반전 여부 |
+| `big_img` | Files & media | 배경 이미지 |
+| `top_circle` | Files & media | 원형 프로필 이미지 |
+| `small_img` | Files & media | 스왑용 작은 이미지 |
+| `gothic_title` | Rich text | 메인 타이틀 (고딕체) |
+| `gothic_sub` | Rich text | 서브 타이틀 |
+| `pill_text` | Rich text | 상단 태그 텍스트 (HTML 가능) |
+| `char_desc` | Rich text | 캐릭터 설명 |
+| `char_type` | Rich text | 타입 |
+| `char_element` | Rich text | 엘리먼트 |
+| `char_origin` | Rich text | 출신 |
+| `shape_color` | Rich text | 배경 색상 (#ffffff) |
+| `is_flipped` | Checkbox | 좌우 반전 여부 |
 
 ### 2. Posts DB (게시글)
 | Property | Type | 설명 |
@@ -67,7 +67,7 @@ git push -u origin main
 | `tags` | Multi-select | 태그들 |
 | `likes` | Number | 좋아요 수 |
 | `comments` | Number | 댓글 수 |
-| `profileId` | Relation → Profiles | 연결된 프로필 |
+| `profile_id` | Relation → Profiles | 연결된 프로필 |
 
 ### 3. Memory DB (갤러리)
 | Property | Type | 설명 |
@@ -82,9 +82,9 @@ git push -u origin main
 | `title` | Title | 곡 제목 |
 | `artist` | Rich text | 아티스트 |
 | `url` | Files & media | 오디오 파일 |
-| `urlText` | Rich text | 또는 외부 URL |
+| `url_text` | Rich text | 또는 외부 URL |
 | `order` | Number | 정렬 순서 |
-| `profileId` | Relation → Profiles | 연결된 프로필 |
+| `profile_id` | Relation → Profiles | 연결된 프로필 |
 
 ---
 
