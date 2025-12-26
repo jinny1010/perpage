@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 
 export default function Home() {
@@ -14,6 +14,16 @@ export default function Home() {
   
   // 폴더 열림 상태
   const [openFolders, setOpenFolders] = useState({});
+  
+  // 테마 (1: 기본, 2: SNS 채팅)
+  const [theme, setTheme] = useState(1);
+  
+  // 등록 모달
+  const [showModal, setShowModal] = useState(false);
+  const [uploadData, setUploadData] = useState({ sub: '', title: '' });
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchPosts();
@@ -75,30 +85,56 @@ export default function Home() {
     setMessages([]);
   };
 
-  // 메시지 포맷팅 (standalone 로직)
+  // 파일 업로드
+  const handleUpload = async () => {
+    if (!uploadData.sub || !uploadData.title || !uploadFile) {
+      alert('폴더, 제목, 파일을 모두 입력해주세요');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('sub', uploadData.sub);
+      formData.append('title', uploadData.title);
+      formData.append('file', uploadFile);
+
+      const res = await fetch('/api/create', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+
+      alert('등록 완료!');
+      setShowModal(false);
+      setUploadData({ sub: '', title: '' });
+      setUploadFile(null);
+      fetchPosts();
+    } catch (err) {
+      alert('등록 실패: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // 메시지 포맷팅
   const formatMessage = (content) => {
     if (!content) return '';
     
-    // OOC 처리
     content = content.replace(/\(??[Oo][Oo][Cc]\s*:[\s\S]*$/gm, (match) => {
       return `<details><summary>OOC Hidden</summary>${match}</details>`;
     });
 
-    // thinking 태그 제거
     content = content.replace(/(?:```?\w*[\r\n]?)?<(thought|cot|thinking|CoT|think|starter)[\s\S]*?<\/(thought|cot|thinking|CoT|think|starter)>(?:[\r\n]?```?)?/g, '');
-
-    // imageinfo 제거
     content = content.replace(/<[Ii][Mm][Aa][Gg][Ee][Ii][Nn][Ff][Oo]>[\s\S]*?<\/[Ii][Mm][Aa][Gg][Ee][Ii][Nn][Ff][Oo]>/g, '');
-    
-    // pic 태그 제거
     content = content.replace(/<pic\s+prompt="[^"]*"\s*\/?>[\s\S]*?(?:<\/pic>)?/g, '');
     content = content.replace(/<pic>[\s\S]*?<\/pic>/g, '');
     content = content.replace(/<\/pic>/g, '');
-    
-    // infoblock 제거
     content = content.replace(/<infoblock>[\s\S]*?<\/infoblock>/g, '');
 
-    // HTML 이스케이프
     const escapeHtml = (text) => {
       return text
         .replace(/&/g, '&amp;')
@@ -107,29 +143,23 @@ export default function Home() {
         .replace(/"/g, '&quot;');
     };
 
-    // 코드 블록 보존
     const codeBlocks = [];
     content = content.replace(/```(\w*)\n?([\s\S]*?)```/g, (match, lang, code) => {
       codeBlocks.push(`<pre><code>${escapeHtml(code)}</code></pre>`);
       return `___CODEBLOCK_${codeBlocks.length - 1}___`;
     });
 
-    // 인라인 코드
     const inlineCodes = [];
     content = content.replace(/`([^`]+)`/g, (match, code) => {
       inlineCodes.push(`<code>${escapeHtml(code)}</code>`);
       return `___INLINE_${inlineCodes.length - 1}___`;
     });
 
-    // 마크다운 변환
     content = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     content = content.replace(/\*(.+?)\*/g, '<em>$1</em>');
     content = content.replace(/_(.+?)_/g, '<em>$1</em>');
-
-    // 인용문
     content = content.replace(/"([^"]+)"/g, '<q>"$1"</q>');
 
-    // 코드 복원
     codeBlocks.forEach((block, i) => {
       content = content.replace(`___CODEBLOCK_${i}___`, block);
     });
@@ -137,7 +167,6 @@ export default function Home() {
       content = content.replace(`___INLINE_${i}___`, code);
     });
 
-    // 줄바꿈
     content = content.replace(/\n\n+/g, '</p><p>');
     content = content.replace(/\n/g, '<br>');
     content = `<p>${content}</p>`;
@@ -166,9 +195,20 @@ export default function Home() {
         <div className="viewer-container">
           <div className="viewer-header">
             <h2>{selectedPost.title}</h2>
-            <button className="btn-back" onClick={closeViewer}>
-              ← 목록으로
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {/* 테마 선택 */}
+              <select 
+                value={theme} 
+                onChange={(e) => setTheme(Number(e.target.value))}
+                className="theme-select"
+              >
+                <option value={1}>테마 1 (기본)</option>
+                <option value={2}>테마 2 (SNS)</option>
+              </select>
+              <button className="btn-back" onClick={closeViewer}>
+                ← 목록
+              </button>
+            </div>
           </div>
 
           {viewerLoading && (
@@ -183,7 +223,7 @@ export default function Home() {
           )}
 
           {!viewerLoading && messages.length > 0 && (
-            <div className="chat-messages">
+            <div className={`chat-messages theme-${theme}`}>
               {messages.map((msg, index) => {
                 const isUser = msg.is_user;
                 const charName = msg.name || (isUser ? 'User' : 'AI');
@@ -193,28 +233,45 @@ export default function Home() {
 
                 if (!content) return null;
 
-                return (
-                  <div key={index} className="mes">
-                    <div className="mesAvatarWrapper" style={{ 
-                      flexDirection: isUser ? 'row-reverse' : 'row' 
-                    }}>
-                      <div className="mesIDDisplay">#{index}</div>
-                      {tokenCount && (
-                        <div className="tokenCounterDisplay">{tokenCount}t</div>
-                      )}
-                    </div>
-                    
-                    <div className="ch_name">
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <span className="name_text">{charName}</span>
-                        {timestamp && (
-                          <small className="timestamp">{timestamp}</small>
+                // 테마 1: 기본 스타일
+                if (theme === 1) {
+                  return (
+                    <div key={index} className="mes">
+                      <div className="mesAvatarWrapper" style={{ 
+                        flexDirection: isUser ? 'row-reverse' : 'row' 
+                      }}>
+                        <div className="mesIDDisplay">#{index}</div>
+                        {tokenCount && (
+                          <div className="tokenCounterDisplay">{tokenCount}t</div>
                         )}
                       </div>
+                      
+                      <div className="ch_name">
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span className="name_text">{charName}</span>
+                          {timestamp && (
+                            <small className="timestamp">{timestamp}</small>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div 
+                        className="mes_text"
+                        dangerouslySetInnerHTML={{ __html: formatMessage(content) }}
+                      />
                     </div>
-                    
+                  );
+                }
+
+                // 테마 2: SNS 채팅 스타일
+                return (
+                  <div key={index} className={`sns-message ${isUser ? 'user' : 'ai'}`}>
+                    <div className="sns-meta">
+                      <span className="sns-name">{charName}</span>
+                      {timestamp && <span className="sns-time">{timestamp}</span>}
+                    </div>
                     <div 
-                      className="mes_text"
+                      className="sns-bubble"
                       dangerouslySetInnerHTML={{ __html: formatMessage(content) }}
                     />
                   </div>
@@ -294,10 +351,17 @@ export default function Home() {
           </div>
         ))}
 
-        {/* 플로팅 새로고침 버튼 */}
+        {/* 플로팅 버튼들 */}
         <div className="floating-menu">
           <button 
-            className="floating-btn" 
+            className="floating-btn add-btn" 
+            onClick={() => setShowModal(true)}
+            title="새 글 등록"
+          >
+            +
+          </button>
+          <button 
+            className="floating-btn refresh-btn" 
             onClick={fetchPosts}
             title="새로고침"
           >
@@ -305,6 +369,72 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* 등록 모달 */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>📝 새 글 등록</h3>
+            
+            <div className="form-group">
+              <label>폴더 (sub)</label>
+              <input 
+                type="text"
+                placeholder="예: 바론, 킬리언"
+                value={uploadData.sub}
+                onChange={(e) => setUploadData({...uploadData, sub: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>제목 (title)</label>
+              <input 
+                type="text"
+                placeholder="게시글 제목"
+                value={uploadData.title}
+                onChange={(e) => setUploadData({...uploadData, title: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>JSON 파일</label>
+              <div 
+                className="file-drop"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploadFile ? (
+                  <span>📄 {uploadFile.name}</span>
+                ) : (
+                  <span>클릭하여 파일 선택 (.json, .jsonl)</span>
+                )}
+                <input 
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,.jsonl"
+                  onChange={(e) => setUploadFile(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+            
+            <div className="modal-buttons">
+              <button 
+                className="btn-cancel"
+                onClick={() => setShowModal(false)}
+              >
+                취소
+              </button>
+              <button 
+                className="btn-submit"
+                onClick={handleUpload}
+                disabled={uploading}
+              >
+                {uploading ? '등록 중...' : '등록'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
