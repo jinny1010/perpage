@@ -78,14 +78,8 @@ export default function Home() {
     };
   };
 
-  // 이미지 배열 (카카오페이지 스타일)
-  const cardImages = [
-    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400',
-  ];
+  // 기본 이미지 (폴더에 이미지 없을 때)
+  const defaultImage = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400';
 
   return (
     <>
@@ -98,9 +92,9 @@ export default function Home() {
         <div 
           className="carousel-bg"
           style={{
-            backgroundImage: folders[currentIndex] 
-              ? `url(${cardImages[currentIndex % cardImages.length]})` 
-              : 'none'
+            backgroundImage: folders[currentIndex]?.imageUrl 
+              ? `url(${folders[currentIndex].imageUrl})` 
+              : `url(${defaultImage})`
           }}
         />
 
@@ -149,7 +143,9 @@ export default function Home() {
                     <div 
                       className="carousel-card-image"
                       style={{
-                        backgroundImage: `url(${cardImages[index % cardImages.length]})`
+                        backgroundImage: folder.imageUrl 
+                          ? `url(${folder.imageUrl})` 
+                          : `url(${defaultImage})`
                       }}
                     />
                     <div className="carousel-card-overlay">
