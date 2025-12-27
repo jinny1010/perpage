@@ -1240,7 +1240,8 @@ body {
   line-height: 1;
   font-family: 'Georgia', 'Times New Roman', serif;
   letter-spacing: -2px;
-  position: relative;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 .main-card-accent {
@@ -1251,15 +1252,17 @@ body {
 }
 
 /* 링크 스타일 완전 리셋 */
-a, a:link, a:visited, a:hover, a:active {
+a, a:link, a:visited, a:hover, a:active,
+a *, a:link *, a:visited *, a:hover *, a:active * {
   color: inherit;
-  text-decoration: none;
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 .main-card-row,
 .main-card-row * {
   color: inherit;
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .main-card-number {
