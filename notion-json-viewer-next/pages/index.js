@@ -14,7 +14,9 @@ export default function Home() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderColor, setNewFolderColor] = useState('#8B0000');
+  const [newFolderImage, setNewFolderImage] = useState(null);
   const [adding, setAdding] = useState(false);
+  const folderImageRef = useRef(null);
 
   useEffect(() => {
     fetchFolders();
@@ -75,13 +77,16 @@ export default function Home() {
     
     setAdding(true);
     try {
+      const formData = new FormData();
+      formData.append('name', newFolderName);
+      formData.append('color', newFolderColor);
+      if (newFolderImage) {
+        formData.append('image', newFolderImage);
+      }
+      
       const res = await fetch('/api/addFolder', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newFolderName,
-          color: newFolderColor,
-        }),
+        body: formData,
       });
       
       const data = await res.json();
@@ -90,6 +95,7 @@ export default function Home() {
       showToast('폴더 추가 완료!', 'success');
       setShowAddModal(false);
       setNewFolderName('');
+      setNewFolderImage(null);
       fetchFolders();
     } catch (err) {
       showToast('추가 실패: ' + err.message, 'error');
@@ -175,6 +181,19 @@ export default function Home() {
                 onChange={(e) => setNewFolderName(e.target.value)}
                 placeholder="캐릭터 이름"
               />
+            </div>
+            <div className="form-group">
+              <label>대표 이미지</label>
+              <div className="file-drop" onClick={() => folderImageRef.current?.click()}>
+                {newFolderImage ? `📷 ${newFolderImage.name}` : '클릭하여 이미지 선택'}
+                <input 
+                  ref={folderImageRef}
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => setNewFolderImage(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+              </div>
             </div>
             <div className="form-group">
               <label>테마 색상</label>

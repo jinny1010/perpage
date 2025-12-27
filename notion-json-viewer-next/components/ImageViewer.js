@@ -14,7 +14,6 @@ export default function ImageViewer({ bookmark, onClose }) {
           />
         )}
         
-        {/* 텍스트 오버레이 */}
         <div className="image-viewer-text-overlay">
           <p className="image-viewer-text">{bookmark.text}</p>
           {bookmark.sourceTitle && (

@@ -1302,13 +1302,13 @@ body {
 
 .image-viewer-card {
   position: relative;
-  max-width: 95vw;
-  max-height: 95vh;
+  max-width: 600px;
+  max-height: 80vh;
 }
 
 .image-viewer-bg {
-  max-width: 95vw;
-  max-height: 95vh;
+  max-width: 600px;
+  max-height: 80vh;
   object-fit: contain;
   display: block;
 }
@@ -1320,29 +1320,27 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 30px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .image-viewer-text {
   color: white;
-  font-size: 20px;
-  line-height: 2;
-  font-weight: 500;
-  text-shadow: 
-    0 2px 4px rgba(0,0,0,0.9),
-    0 4px 8px rgba(0,0,0,0.7);
-  max-height: 80%;
+  font-size: 15px;
+  line-height: 1.8;
+  font-weight: 400;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+  max-height: 70%;
   overflow-y: auto;
   word-break: keep-all;
 }
 
 .image-viewer-source {
-  margin-top: 20px;
-  color: rgba(255,255,255,0.8);
-  font-size: 14px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  margin-top: 15px;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
 
 /* 반응형 */
@@ -1809,4 +1807,177 @@ body {
 
 .add-folder-btn:hover {
   transform: scale(1.1);
+}
+
+/* 뷰어 헤더 페이드아웃 */
+.viewer-header {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.viewer-header.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+/* 목록 모달 헤더 */
+.list-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.list-modal-header h3 {
+  margin: 0;
+}
+
+.list-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.list-add-btn:hover {
+  transform: scale(1.1);
+}
+
+/* 선택된 텍스트 플로팅 버튼 (모바일용) */
+.floating-bookmark-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  z-index: 1000;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.floating-bookmark-btn:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+/* 뷰어 헤더 페이드아웃 */
+.viewer-header {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.viewer-header.hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+/* 목록 모달 헤더 */
+.list-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.list-modal-header h3 {
+  margin: 0;
+}
+
+.list-modal-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.list-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.list-add-btn:hover {
+  transform: scale(1.1);
+}
+
+.list-modal-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* 모바일 책갈피 버튼 */
+.mobile-bookmark-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  z-index: 100;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 모바일 반응형 이미지 뷰어 */
+@media (max-width: 768px) {
+  .image-viewer-card {
+    max-width: 90vw;
+  }
+  
+  .image-viewer-bg {
+    max-width: 90vw;
+  }
+  
+  .image-viewer-text {
+    font-size: 13px;
+    line-height: 1.6;
+  }
 }

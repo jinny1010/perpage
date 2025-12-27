@@ -10,63 +10,38 @@ export default function FolderPage() {
   const { sub } = router.query;
   const { showToast } = useToast();
   
-  // 폴더 정보
   const [folderInfo, setFolderInfo] = useState(null);
   const [folderIndex, setFolderIndex] = useState(0);
-  
-  // 탭 상태
   const [activeTab, setActiveTab] = useState('');
-  
-  // 게시글
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // 뷰어 상태
   const [selectedPost, setSelectedPost] = useState(null);
   const [messages, setMessages] = useState([]);
   const [viewerLoading, setViewerLoading] = useState(false);
-  
-  // 테마
   const [theme, setTheme] = useState(1);
-  
-  // 등록 모달
   const [showModal, setShowModal] = useState(false);
   const [uploadData, setUploadData] = useState({ title: '' });
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
-  
-  // 삭제 대상
   const [deleteTarget, setDeleteTarget] = useState(null);
-  
-  // 책갈피
   const [bookmarks, setBookmarks] = useState([]);
   const [bookmarksLoading, setBookmarksLoading] = useState(false);
   const [selectedBookmark, setSelectedBookmark] = useState(null);
-  
-  // 책갈피 추가 모달
   const [bookmarkModal, setBookmarkModal] = useState(null);
   const [bookmarkImage, setBookmarkImage] = useState(null);
   const [bookmarkSaving, setBookmarkSaving] = useState(false);
-  const bookmarkImageRef = useRef(null);
-  
-  // 컨텍스트 메뉴
   const [contextMenu, setContextMenu] = useState(null);
-  
-  // 시계
-  const [time, setTime] = useState(new Date());
-  
-  // 스크롤
   const viewerRef = useRef(null);
   const longPressTimer = useRef(null);
+  
+  // 헤더 표시 상태
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollTop = useRef(0);
+  
+  // 모바일 선택 텍스트 버튼
+  const [selectedText, setSelectedText] = useState(null);
 
-  // 시계 업데이트
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // 테마 불러오기/저장
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('jsonViewerTheme');
@@ -80,7 +55,6 @@ export default function FolderPage() {
     }
   }, [theme]);
 
-  // 데이터 로드
   useEffect(() => {
     if (sub) {
       fetchFolderInfo();
@@ -89,7 +63,6 @@ export default function FolderPage() {
     }
   }, [sub]);
 
-  // 스크롤 위치 복원
   useEffect(() => {
     if (selectedPost && viewerRef.current && !viewerLoading) {
       const savedPosition = localStorage.getItem(`scroll_${selectedPost.id}`);
@@ -105,28 +78,47 @@ export default function FolderPage() {
 
   const handleScroll = () => {
     if (selectedPost && viewerRef.current) {
-      localStorage.setItem(`scroll_${selectedPost.id}`, viewerRef.current.scrollTop.toString());
+      const currentScrollTop = viewerRef.current.scrollTop;
+      localStorage.setItem(`scroll_${selectedPost.id}`, currentScrollTop.toString());
+      
+      if (currentScrollTop > lastScrollTop.current && currentScrollTop > 50) {
+        setShowHeader(false);
+      } else {
+        setShowHeader(true);
+      }
+      lastScrollTop.current = currentScrollTop;
     }
   };
 
-  // 컨텍스트 메뉴 닫기
   useEffect(() => {
-    const handleClick = () => setContextMenu(null);
+    const handleClick = () => {
+      setContextMenu(null);
+      setSelectedText(null);
+    };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const selection = window.getSelection();
+      const text = selection?.toString().trim();
+      if (text && text.length > 0 && selectedPost) {
+        setSelectedText({ text, sourceTitle: selectedPost.title });
+      }
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, [selectedPost]);
 
   const fetchFolderInfo = async () => {
     try {
       const res = await fetch('/api/folders');
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      
       const folders = data.folders || [];
       const index = folders.findIndex(f => f.name === sub);
-      const folder = folders[index];
-      
-      setFolderInfo(folder);
+      setFolderInfo(folders[index]);
       setFolderIndex(index + 1);
     } catch (err) {
       console.error(err);
@@ -155,7 +147,7 @@ export default function FolderPage() {
       if (!res.ok) throw new Error(data.message);
       setBookmarks(data.bookmarks || []);
     } catch (err) {
-      console.error('Bookmarks error:', err);
+      console.error(err);
     } finally {
       setBookmarksLoading(false);
     }
@@ -165,7 +157,8 @@ export default function FolderPage() {
     setSelectedPost(post);
     setViewerLoading(true);
     setMessages([]);
-    
+    setShowHeader(true);
+    lastScrollTop.current = 0;
     try {
       const res = await fetch(`/api/content?pageId=${post.id}`);
       const data = await res.json();
@@ -181,6 +174,7 @@ export default function FolderPage() {
   const closeViewer = () => {
     setSelectedPost(null);
     setMessages([]);
+    setSelectedText(null);
   };
 
   const handleUpload = async () => {
@@ -188,18 +182,15 @@ export default function FolderPage() {
       showToast('제목을 입력해주세요', 'error');
       return;
     }
-
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append('sub', sub);
       formData.append('title', uploadData.title);
       if (uploadFile) formData.append('file', uploadFile);
-
       const res = await fetch('/api/create', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-
       showToast('등록 완료!', 'success');
       setShowModal(false);
       setUploadData({ title: '' });
@@ -235,7 +226,6 @@ export default function FolderPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-
       const updated = [...messages];
       updated.splice(index, 1);
       setMessages(updated);
@@ -255,14 +245,13 @@ export default function FolderPage() {
       formData.append('sourceTitle', bookmarkModal.sourceTitle || '');
       formData.append('sub', sub);
       if (bookmarkImage) formData.append('image', bookmarkImage);
-
       const res = await fetch('/api/bookmark', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-
       showToast('책갈피 저장!', 'success');
       setBookmarkModal(null);
       setBookmarkImage(null);
+      setSelectedText(null);
       fetchBookmarks();
     } catch (err) {
       showToast('저장 실패: ' + err.message, 'error');
@@ -281,20 +270,6 @@ export default function FolderPage() {
     });
   };
 
-  const handleTouchStart = (e, type, data) => {
-    longPressTimer.current = setTimeout(() => handleContextMenu(e, type, data), 500);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
-  };
-
-  const handleTextSelect = () => {
-    const selection = window.getSelection();
-    const text = selection?.toString().trim();
-    return text && text.length > 0 ? text : null;
-  };
-
   const formatMessage = (content) => {
     if (!content) return '';
     content = content.replace(/\(??[Oo][Oo][Cc]\s*:[\s\S]*$/gm, (m) => `<details><summary>OOC</summary>${m}</details>`);
@@ -311,7 +286,6 @@ export default function FolderPage() {
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
-  const formatTime = (d) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   if (!sub) return null;
 
@@ -325,7 +299,7 @@ export default function FolderPage() {
       <>
         <Head><title>{selectedPost.title}</title></Head>
         <div className="viewer-container">
-          <div className="viewer-header">
+          <div className={`viewer-header ${showHeader ? '' : 'hidden'}`}>
             <h2>{selectedPost.title}</h2>
             <div style={{ display: 'flex', gap: '8px' }}>
               <select value={theme} onChange={(e) => setTheme(Number(e.target.value))} className="theme-select">
@@ -339,7 +313,8 @@ export default function FolderPage() {
           {!viewerLoading && messages.length > 0 && (
             <div className={`chat-messages theme-${theme}`} ref={viewerRef} onScroll={handleScroll}
               onContextMenu={(e) => {
-                const t = handleTextSelect();
+                const selection = window.getSelection();
+                const t = selection?.toString().trim();
                 if (t) { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, type: 'bookmark', data: { text: t, sourceTitle: selectedPost.title } }); }
               }}>
               {messages.map((msg, i) => {
@@ -363,6 +338,12 @@ export default function FolderPage() {
                 );
               })}
             </div>
+          )}
+          
+          {selectedText && (
+            <button className="mobile-bookmark-btn" onClick={(e) => { e.stopPropagation(); setBookmarkModal(selectedText); }}>
+              🔖 책갈피 추가
+            </button>
           )}
         </div>
         {contextMenu && (
@@ -407,10 +388,8 @@ export default function FolderPage() {
       <Head><title>{sub}</title></Head>
       <div className="folder-dashboard" style={{ background: `radial-gradient(ellipse at bottom left, ${themeColor}60 0%, #0a0a0a 60%)` }}>
         
-        {/* 홈 버튼 */}
         <Link href="/"><button className="dashboard-home">← 홈</button></Link>
 
-        {/* 왼쪽 상단: 메인 이미지 (책갈피 최신 또는 대표이미지) */}
         <div 
           className="dashboard-main-image" 
           style={{ 
@@ -419,14 +398,12 @@ export default function FolderPage() {
           }} 
         />
 
-        {/* 왼쪽 하단: 번호 + 장식 */}
         <div className="dashboard-number" style={{ color: themeColor }}>{String(folderIndex).padStart(2, '0')}</div>
         <div className="dashboard-deco">
           <div className="lamp">🪔</div>
           <div className="hearts">❤️❤️</div>
         </div>
 
-        {/* 중앙: 음악 플레이어 */}
         {youtubeId && (
           <div className="dashboard-player">
             <div className="player-icon">💬</div>
@@ -438,26 +415,30 @@ export default function FolderPage() {
           </div>
         )}
 
-        {/* 오른쪽: 메뉴 이미지들 (클릭하면 새로고침) */}
-        <div className="dashboard-menu" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); showToast('새로고침!', 'success'); }}>
+        <div className="dashboard-menu" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
           {(folderInfo?.menuImages?.length > 0 ? folderInfo.menuImages : folderInfo?.imageUrl ? [folderInfo.imageUrl] : []).slice(0, 2).map((img, i) => (
-            <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor, cursor: 'pointer' }} title="클릭하여 새로고침" />
+            <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor, cursor: 'pointer' }} />
           ))}
         </div>
 
-        {/* 오른쪽 하단: 탭 버튼 */}
         <div className="dashboard-tabs">
           <button onClick={() => setActiveTab('posts')} style={{ background: themeColor }}>목록 ({posts.length})</button>
           <button onClick={() => setActiveTab('bookmarks')} style={{ background: themeColor }}>책갈피 ({bookmarks.length})</button>
         </div>
       </div>
 
-      {/* 목록/책갈피 모달 */}
       {activeTab && !selectedBookmark && (
         <div className="list-modal-overlay" onClick={() => setActiveTab('')}>
           <div className="list-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="list-modal-close" onClick={() => setActiveTab('')}>✕</button>
-            <h3>{activeTab === 'posts' ? '📄 목록' : '🔖 책갈피'}</h3>
+            <div className="list-modal-header">
+              <h3>{activeTab === 'posts' ? '📄 목록' : '🔖 책갈피'}</h3>
+              <div className="list-modal-actions">
+                {activeTab === 'posts' && (
+                  <button className="list-add-btn" onClick={() => setShowModal(true)}>+</button>
+                )}
+                <button className="list-modal-close" onClick={() => setActiveTab('')}>✕</button>
+              </div>
+            </div>
             {activeTab === 'posts' && (
               <ul className="list-items">
                 {posts.map(p => (
@@ -482,14 +463,12 @@ export default function FolderPage() {
         </div>
       )}
 
-      {/* 컨텍스트 메뉴 */}
       {contextMenu?.type === 'post' && (
         <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
           <button onClick={() => { setDeleteTarget({ type: 'post', ...contextMenu.data.post }); setContextMenu(null); }}>🗑️ 삭제</button>
         </div>
       )}
 
-      {/* 삭제 모달 */}
       {deleteTarget?.type === 'post' && (
         <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -502,7 +481,6 @@ export default function FolderPage() {
         </div>
       )}
 
-      {/* 등록 모달 */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -521,7 +499,6 @@ export default function FolderPage() {
         </div>
       )}
 
-      {/* 책갈피 뷰어 - 닫으면 책갈피 리스트로 */}
       <ImageViewer bookmark={selectedBookmark} onClose={() => { setSelectedBookmark(null); setActiveTab('bookmarks'); }} />
     </>
   );
