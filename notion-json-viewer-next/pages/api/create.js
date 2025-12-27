@@ -40,15 +40,6 @@ export default async function handler(req, res) {
             },
           ],
         },
-        'title': {
-          rich_text: [
-            {
-              text: {
-                content: title,
-              },
-            },
-          ],
-        },
       },
     });
 

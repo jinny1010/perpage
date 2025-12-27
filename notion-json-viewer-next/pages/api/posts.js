@@ -14,7 +14,6 @@ export default async function handler(req, res) {
       database_id: process.env.NOTION_DATABASE_ID,
       sorts: [
         { property: 'sub', direction: 'ascending' },
-        { property: 'title', direction: 'ascending' }
       ]
     });
 
@@ -23,17 +22,13 @@ export default async function handler(req, res) {
     for (const page of response.results) {
       const props = page.properties;
       
-      // 이름 (title 타입)
+      // 이름 (title 타입) - 제목으로 사용
       const nameProperty = props['이름'];
-      const name = nameProperty?.title?.[0]?.plain_text || '';
+      const name = nameProperty?.title?.[0]?.plain_text || '제목 없음';
       
       // sub (폴더)
       const subProperty = props['sub'];
       const sub = subProperty?.rich_text?.[0]?.plain_text || '미분류';
-      
-      // title (제목)
-      const titleProperty = props['title'];
-      const title = titleProperty?.rich_text?.[0]?.plain_text || name || '제목 없음';
       
       // jsonFile 있는지 확인
       const fileProperty = props['jsonFile'];
@@ -44,7 +39,7 @@ export default async function handler(req, res) {
           id: page.id,
           name,
           sub,
-          title,
+          title: name, // 이름을 제목으로 사용
           createdAt: page.created_time,
         });
       }
