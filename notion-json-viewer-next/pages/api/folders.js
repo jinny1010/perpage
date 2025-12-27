@@ -38,6 +38,7 @@ export default async function handler(req, res) {
 
       if (sub) {
         folderMap[sub] = {
+          id: page.id,
           name: sub,
           imageUrl,
           menuImages,

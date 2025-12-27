@@ -1217,9 +1217,12 @@ body {
   height: 360px;
   background-size: cover;
   background-position: center;
-  filter: grayscale(60%) sepia(30%) contrast(1.1);
   border: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
+}
+
+.main-card-image.no-filter {
+  filter: none;
 }
 
 .main-card-info {
