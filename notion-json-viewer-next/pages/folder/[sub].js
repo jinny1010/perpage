@@ -383,37 +383,73 @@ export default function FolderPage() {
 
   // 대시보드
   return (
-    <>
-      <Head><title>{sub}</title></Head>
-      <div className="folder-dashboard" style={{ background: `radial-gradient(ellipse at bottom left, ${themeColor}60 0%, #0a0a0a 60%)` }}>
-        
-        <Link href="/"><button className="dashboard-home">← 홈</button></Link>
-
-        <div 
-          className="dashboard-main-image" 
-          style={{ 
-            backgroundImage: latestBookmarkImage ? `url(${latestBookmarkImage})` : folderInfo?.imageUrl ? `url(${folderInfo.imageUrl})` : 'none', 
-            borderColor: themeColor 
-          }} 
-        />
-
-        <div className="dashboard-number" style={{ color: themeColor }}>{String(folderIndex).padStart(2, '0')}</div>
-        <div className="dashboard-deco">
-          <div className="lamp">🪔</div>
-          <div className="hearts">❤️❤️</div>
+  <>
+    <Head><title>{sub}</title></Head>
+    <div className="folder-dashboard-v2">
+      
+      {/* 1. 상단 메뉴 구역 (사진 우측 상단 구성) */}
+      <div className="top-header-area">
+        <div className="lyrics-text">
+          And I don't wanna spend it with nobody else...<br/>
+          How am I? Don't nobody know myself.
         </div>
-
-        <div className="dashboard-menu" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
-          {(folderInfo?.menuImages?.length > 0 ? folderInfo.menuImages : folderInfo?.imageUrl ? [folderInfo.imageUrl] : []).slice(0, 2).map((img, i) => (
-            <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor, cursor: 'pointer' }} />
-          ))}
-        </div>
-
-        <div className="dashboard-tabs">
-          <button onClick={() => setActiveTab('posts')} style={{ background: themeColor }}>목록 ({posts.length})</button>
-          <button onClick={() => setActiveTab('bookmarks')} style={{ background: themeColor }}>책갈피 ({bookmarks.length})</button>
+        <div className="top-action-buttons">
+          <button className="minimal-btn">Select</button>
+          <button className="minimal-btn">Select All</button>
+          <button className="minimal-btn active" onClick={() => setActiveTab('posts')}>Posts</button>
         </div>
       </div>
+
+      <div className="main-collage-grid">
+        {/* 2. 좌측 메인 구역 */}
+        <div className="collage-left">
+          <div className="main-image-wrapper">
+            <img 
+              src={folderInfo?.imageUrl || "/placeholder.jpg"} 
+              className="main-img-frame" 
+              alt="main"
+            />
+            {/* 스포티파이 스타일 위젯 */}
+            <div className="spotify-widget-overlay">
+              <div className="spot-icon">🎵</div>
+              <div className="spot-info">
+                <div className="spot-title">Careless Whisper</div>
+                <div className="spot-artist">George Michael</div>
+              </div>
+              <div className="spot-controls">◀  ▶  ◼</div>
+            </div>
+          </div>
+
+          <div className="meta-info-row">
+            <span className="badge-item">02.09.22</span>
+            <span className="badge-item">12:22</span>
+          </div>
+
+          <div className="deco-footer">
+            <div className="big-number-outline">01</div>
+            <div className="lamp-icon">🪔</div>
+          </div>
+        </div>
+
+        {/* 3. 우측 이미지 스택 구역 */}
+        <div className="collage-right">
+          <div className="stack-image-box">
+            <img src={latestBookmarkImage || folderInfo?.imageUrl} alt="stack1" />
+          </div>
+          <div className="stack-image-box grayscale">
+            <img src={latestBookmarkImage || folderInfo?.imageUrl} alt="stack2" />
+          </div>
+        </div>
+      </div>
+
+      <Link href="/"><button className="floating-home-btn">← Home</button></Link>
+
+      {/* 탭 버튼 및 나머지 모달 기능은 기존과 동일하게 유지 */}
+      <div className="bottom-nav-tabs">
+        <button onClick={() => setActiveTab('posts')} style={{ background: themeColor }}>목록 ({posts.length})</button>
+        <button onClick={() => setActiveTab('bookmarks')} style={{ background: themeColor }}>책갈피 ({bookmarks.length})</button>
+      </div>
+    </div>
 
       {activeTab && !selectedBookmark && (
         <div className="list-modal-overlay" onClick={() => setActiveTab('')}>
