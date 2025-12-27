@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useToast } from '../components/Toast';
@@ -7,6 +7,8 @@ export default function Home() {
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
+  const containerRef = useRef(null);
+  const originalLength = useRef(0);
 
   useEffect(() => {
     fetchFolders();
@@ -20,9 +22,11 @@ export default function Home() {
       
       if (!res.ok) throw new Error(data.message || 'Failed to fetch');
       
-      // 무한 루프를 위해 앞뒤로 복제
       const original = data.folders || [];
+      originalLength.current = original.length;
+      
       if (original.length > 0) {
+        // 무한 루프용: 앞뒤로 복제
         setFolders([...original, ...original, ...original]);
       } else {
         setFolders([]);
@@ -34,6 +38,34 @@ export default function Home() {
     }
   };
 
+  // 무한 스크롤 처리
+  const handleScroll = useCallback(() => {
+    if (!containerRef.current || originalLength.current === 0) return;
+    
+    const container = containerRef.current;
+    const scrollTop = container.scrollTop;
+    const scrollHeight = container.scrollHeight;
+    const clientHeight = container.clientHeight;
+    const oneSetHeight = scrollHeight / 3;
+    
+    // 맨 위 도달 시 중간으로 점프
+    if (scrollTop < oneSetHeight * 0.3) {
+      container.scrollTop = scrollTop + oneSetHeight;
+    }
+    // 맨 아래 도달 시 중간으로 점프
+    else if (scrollTop > oneSetHeight * 2.3) {
+      container.scrollTop = scrollTop - oneSetHeight;
+    }
+  }, []);
+
+  // 초기 스크롤 위치 중간으로
+  useEffect(() => {
+    if (containerRef.current && folders.length > 0) {
+      const scrollHeight = containerRef.current.scrollHeight;
+      containerRef.current.scrollTop = scrollHeight / 3;
+    }
+  }, [folders]);
+
   const defaultImage = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400';
 
   return (
@@ -42,7 +74,11 @@ export default function Home() {
         <title>JSON Viewer</title>
       </Head>
 
-      <div className="main-scroll-container">
+      <div 
+        className="main-scroll-container"
+        ref={containerRef}
+        onScroll={handleScroll}
+      >
         {/* 좌측 세로 타이틀 */}
         <div className="main-side-title">
           <span>ordinary day</span>
@@ -81,7 +117,7 @@ export default function Home() {
                   {/* 우측 정보 */}
                   <div className="main-card-info">
                     <div className="main-card-number">
-                      {String((index % Math.ceil(folders.length / 3)) + 1).padStart(2, '0')}
+                      {String((index % originalLength.current) + 1).padStart(2, '0')}
                     </div>
                     <div className="main-card-divider" />
                     <div className="main-card-meta">
