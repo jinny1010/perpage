@@ -9,6 +9,12 @@ export default function Home() {
   const { showToast } = useToast();
   const containerRef = useRef(null);
   const originalLength = useRef(0);
+  
+  // 폴더 추가 모달
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [newFolderColor, setNewFolderColor] = useState('#8B0000');
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     fetchFolders();
@@ -26,7 +32,6 @@ export default function Home() {
       originalLength.current = original.length;
       
       if (original.length > 0) {
-        // 무한 루프용: 앞뒤로 복제
         setFolders([...original, ...original, ...original]);
       } else {
         setFolders([]);
@@ -38,33 +43,60 @@ export default function Home() {
     }
   };
 
-  // 무한 스크롤 처리
+  // 무한 스크롤
   const handleScroll = useCallback(() => {
     if (!containerRef.current || originalLength.current === 0) return;
     
     const container = containerRef.current;
     const scrollTop = container.scrollTop;
     const scrollHeight = container.scrollHeight;
-    const clientHeight = container.clientHeight;
     const oneSetHeight = scrollHeight / 3;
     
-    // 맨 위 도달 시 중간으로 점프
     if (scrollTop < oneSetHeight * 0.3) {
       container.scrollTop = scrollTop + oneSetHeight;
-    }
-    // 맨 아래 도달 시 중간으로 점프
-    else if (scrollTop > oneSetHeight * 2.3) {
+    } else if (scrollTop > oneSetHeight * 2.3) {
       container.scrollTop = scrollTop - oneSetHeight;
     }
   }, []);
 
-  // 초기 스크롤 위치 중간으로
   useEffect(() => {
     if (containerRef.current && folders.length > 0) {
       const scrollHeight = containerRef.current.scrollHeight;
       containerRef.current.scrollTop = scrollHeight / 3;
     }
   }, [folders]);
+
+  // 폴더 추가
+  const handleAddFolder = async () => {
+    if (!newFolderName.trim()) {
+      showToast('폴더 이름을 입력해주세요', 'error');
+      return;
+    }
+    
+    setAdding(true);
+    try {
+      const res = await fetch('/api/addFolder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newFolderName,
+          color: newFolderColor,
+        }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      
+      showToast('폴더 추가 완료!', 'success');
+      setShowAddModal(false);
+      setNewFolderName('');
+      fetchFolders();
+    } catch (err) {
+      showToast('추가 실패: ' + err.message, 'error');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const defaultImage = 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400';
 
@@ -79,7 +111,6 @@ export default function Home() {
         ref={containerRef}
         onScroll={handleScroll}
       >
-        {/* 좌측 세로 타이틀 */}
         <div className="main-side-title">
           <span>ordinary day</span>
         </div>
@@ -98,13 +129,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* 카드 리스트 */}
         {!loading && folders.length > 0 && (
           <div className="main-cards-wrapper">
             {folders.map((folder, index) => (
               <Link href={`/folder/${encodeURIComponent(folder.name)}`} key={`${folder.name}-${index}`}>
                 <div className="main-card-row">
-                  {/* 이미지 */}
                   <div 
                     className="main-card-image"
                     style={{
@@ -113,8 +142,6 @@ export default function Home() {
                         : `url(${defaultImage})`
                     }}
                   />
-                  
-                  {/* 우측 정보 */}
                   <div className="main-card-info">
                     <div className="main-card-number">
                       {String((index % originalLength.current) + 1).padStart(2, '0')}
@@ -130,7 +157,43 @@ export default function Home() {
             ))}
           </div>
         )}
+
+        {/* 폴더 추가 버튼 */}
+        <button className="add-folder-btn" onClick={() => setShowAddModal(true)}>+</button>
       </div>
+
+      {/* 폴더 추가 모달 */}
+      {showAddModal && (
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>📁 새 폴더 추가</h3>
+            <div className="form-group">
+              <label>폴더 이름</label>
+              <input 
+                type="text" 
+                value={newFolderName} 
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="캐릭터 이름"
+              />
+            </div>
+            <div className="form-group">
+              <label>테마 색상</label>
+              <input 
+                type="color" 
+                value={newFolderColor} 
+                onChange={(e) => setNewFolderColor(e.target.value)}
+                style={{ width: '100%', height: '40px', cursor: 'pointer' }}
+              />
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => setShowAddModal(false)}>취소</button>
+              <button className="btn-submit" onClick={handleAddFolder} disabled={adding}>
+                {adding ? '추가 중...' : '추가'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

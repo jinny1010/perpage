@@ -332,7 +332,7 @@ export default function FolderPage() {
                 <option value={1}>테마 1</option>
                 <option value={2}>테마 2</option>
               </select>
-              <button className="btn-back" onClick={closeViewer}>← 목록</button>
+              <button className="btn-back" onClick={() => { closeViewer(); setActiveTab('posts'); }}>← 목록</button>
             </div>
           </div>
           {viewerLoading && <div className="loading"><div className="spinner"></div></div>}
@@ -364,7 +364,6 @@ export default function FolderPage() {
               })}
             </div>
           )}
-          <div className="floating-menu"><button className="floating-btn" onClick={closeViewer}>←</button></div>
         </div>
         {contextMenu && (
           <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
@@ -420,12 +419,6 @@ export default function FolderPage() {
           }} 
         />
 
-        {/* 왼쪽 하단: 시계 */}
-        <div className="dashboard-clock">
-          <span>{time.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')}</span>
-          <span>{formatTime(time)}</span>
-        </div>
-
         {/* 왼쪽 하단: 번호 + 장식 */}
         <div className="dashboard-number" style={{ color: themeColor }}>{String(folderIndex).padStart(2, '0')}</div>
         <div className="dashboard-deco">
@@ -445,35 +438,22 @@ export default function FolderPage() {
           </div>
         )}
 
-        {/* 오른쪽: 메뉴 이미지들 */}
-        <div className="dashboard-menu">
+        {/* 오른쪽: 메뉴 이미지들 (클릭하면 새로고침) */}
+        <div className="dashboard-menu" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); showToast('새로고침!', 'success'); }}>
           {(folderInfo?.menuImages?.length > 0 ? folderInfo.menuImages : folderInfo?.imageUrl ? [folderInfo.imageUrl] : []).slice(0, 2).map((img, i) => (
-            <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor }} />
+            <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor, cursor: 'pointer' }} title="클릭하여 새로고침" />
           ))}
         </div>
-
-        {/* 오른쪽 상단: 책갈피 텍스트 */}
-        {bookmarks[0]?.text && (
-          <div className="dashboard-quote">
-            <p>{bookmarks[0].text.slice(0, 150)}{bookmarks[0].text.length > 150 ? '...' : ''}</p>
-          </div>
-        )}
 
         {/* 오른쪽 하단: 탭 버튼 */}
         <div className="dashboard-tabs">
           <button onClick={() => setActiveTab('posts')} style={{ background: themeColor }}>목록 ({posts.length})</button>
           <button onClick={() => setActiveTab('bookmarks')} style={{ background: themeColor }}>책갈피 ({bookmarks.length})</button>
         </div>
-
-        {/* 플로팅 버튼 */}
-        <div className="floating-menu">
-          <button className="floating-btn" onClick={() => setShowModal(true)} style={{ background: themeColor }}>+</button>
-          <button className="floating-btn" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>🔄</button>
-        </div>
       </div>
 
       {/* 목록/책갈피 모달 */}
-      {activeTab && (
+      {activeTab && !selectedBookmark && (
         <div className="list-modal-overlay" onClick={() => setActiveTab('')}>
           <div className="list-modal" onClick={(e) => e.stopPropagation()}>
             <button className="list-modal-close" onClick={() => setActiveTab('')}>✕</button>
@@ -481,7 +461,7 @@ export default function FolderPage() {
             {activeTab === 'posts' && (
               <ul className="list-items">
                 {posts.map(p => (
-                  <li key={p.id} onClick={() => { openPost(p); setActiveTab(''); }} onContextMenu={(e) => handleContextMenu(e, 'post', { post: p })}>
+                  <li key={p.id} onClick={() => openPost(p)} onContextMenu={(e) => handleContextMenu(e, 'post', { post: p })}>
                     <span>{p.title}</span><small>{formatDate(p.createdAt)}</small>
                   </li>
                 ))}
@@ -491,7 +471,7 @@ export default function FolderPage() {
             {activeTab === 'bookmarks' && (
               <div className="bookmark-grid">
                 {bookmarks.map((b, i) => (
-                  <div key={i} className="bookmark-item" style={{ backgroundImage: b.imageUrl ? `url(${b.imageUrl})` : `linear-gradient(${themeColor}, #111)` }} onClick={() => { setSelectedBookmark(b); setActiveTab(''); }}>
+                  <div key={i} className="bookmark-item" style={{ backgroundImage: b.imageUrl ? `url(${b.imageUrl})` : `linear-gradient(${themeColor}, #111)` }} onClick={() => setSelectedBookmark(b)}>
                     <p>{b.text.slice(0, 40)}...</p>
                   </div>
                 ))}
@@ -541,7 +521,8 @@ export default function FolderPage() {
         </div>
       )}
 
-      <ImageViewer bookmark={selectedBookmark} onClose={() => setSelectedBookmark(null)} />
+      {/* 책갈피 뷰어 - 닫으면 책갈피 리스트로 */}
+      <ImageViewer bookmark={selectedBookmark} onClose={() => { setSelectedBookmark(null); setActiveTab('bookmarks'); }} />
     </>
   );
 }
