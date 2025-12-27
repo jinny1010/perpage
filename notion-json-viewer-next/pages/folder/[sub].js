@@ -406,27 +406,37 @@ export default function FolderPage() {
   return (
     <>
       <Head><title>{sub}</title></Head>
-      <div className="folder-dashboard" style={{ background: `radial-gradient(ellipse at bottom, ${themeColor}50 0%, #0a0a0a 70%)` }}>
+      <div className="folder-dashboard" style={{ background: `radial-gradient(ellipse at bottom left, ${themeColor}60 0%, #0a0a0a 60%)` }}>
         
         {/* 홈 버튼 */}
         <Link href="/"><button className="dashboard-home">← 홈</button></Link>
 
-        {/* 왼쪽: 메인 이미지 */}
-        <div className="dashboard-main-image" style={{ backgroundImage: latestBookmarkImage ? `url(${latestBookmarkImage})` : folderInfo?.imageUrl ? `url(${folderInfo.imageUrl})` : 'none', borderColor: themeColor }} />
+        {/* 왼쪽 상단: 메인 이미지 (책갈피 최신 또는 대표이미지) */}
+        <div 
+          className="dashboard-main-image" 
+          style={{ 
+            backgroundImage: latestBookmarkImage ? `url(${latestBookmarkImage})` : folderInfo?.imageUrl ? `url(${folderInfo.imageUrl})` : 'none', 
+            borderColor: themeColor 
+          }} 
+        />
 
-        {/* 시계 */}
+        {/* 왼쪽 하단: 시계 */}
         <div className="dashboard-clock">
-          <span>{time.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', year: '2-digit' }).replace(/\. /g, '.')}</span>
+          <span>{time.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')}</span>
           <span>{formatTime(time)}</span>
         </div>
 
-        {/* 번호 */}
+        {/* 왼쪽 하단: 번호 + 장식 */}
         <div className="dashboard-number" style={{ color: themeColor }}>{String(folderIndex).padStart(2, '0')}</div>
+        <div className="dashboard-deco">
+          <div className="lamp">🪔</div>
+          <div className="hearts">❤️❤️</div>
+        </div>
 
-        {/* 음악 플레이어 */}
+        {/* 중앙: 음악 플레이어 */}
         {youtubeId && (
-          <div className="dashboard-player" style={{ borderColor: themeColor }}>
-            <div className="player-thumb" style={{ backgroundImage: `url(https://img.youtube.com/vi/${youtubeId}/0.jpg)` }} />
+          <div className="dashboard-player">
+            <div className="player-icon">💬</div>
             <div className="player-info">
               <small>Now Playing</small>
               <span>{sub}</span>
@@ -435,27 +445,27 @@ export default function FolderPage() {
           </div>
         )}
 
-        {/* 메뉴 이미지 */}
+        {/* 오른쪽: 메뉴 이미지들 */}
         <div className="dashboard-menu">
-          {(folderInfo?.menuImages || [folderInfo?.imageUrl]).filter(Boolean).slice(0, 2).map((img, i) => (
+          {(folderInfo?.menuImages?.length > 0 ? folderInfo.menuImages : folderInfo?.imageUrl ? [folderInfo.imageUrl] : []).slice(0, 2).map((img, i) => (
             <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor }} />
           ))}
         </div>
 
-        {/* 책갈피 텍스트 */}
+        {/* 오른쪽 상단: 책갈피 텍스트 */}
         {bookmarks[0]?.text && (
           <div className="dashboard-quote">
-            <p>{bookmarks[0].text.slice(0, 120)}{bookmarks[0].text.length > 120 ? '...' : ''}</p>
+            <p>{bookmarks[0].text.slice(0, 150)}{bookmarks[0].text.length > 150 ? '...' : ''}</p>
           </div>
         )}
 
-        {/* 탭 버튼 */}
+        {/* 오른쪽 하단: 탭 버튼 */}
         <div className="dashboard-tabs">
           <button onClick={() => setActiveTab('posts')} style={{ background: themeColor }}>목록 ({posts.length})</button>
           <button onClick={() => setActiveTab('bookmarks')} style={{ background: themeColor }}>책갈피 ({bookmarks.length})</button>
         </div>
 
-        {/* 플로팅 */}
+        {/* 플로팅 버튼 */}
         <div className="floating-menu">
           <button className="floating-btn" onClick={() => setShowModal(true)} style={{ background: themeColor }}>+</button>
           <button className="floating-btn" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>🔄</button>
