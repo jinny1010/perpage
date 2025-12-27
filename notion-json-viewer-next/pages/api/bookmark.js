@@ -32,6 +32,7 @@ export default async function handler(req, res) {
 
     const text = Array.isArray(fields.text) ? fields.text[0] : fields.text;
     const sourceTitle = Array.isArray(fields.sourceTitle) ? fields.sourceTitle[0] : fields.sourceTitle;
+    const sub = Array.isArray(fields.sub) ? fields.sub[0] : fields.sub;
     const imageFile = files.image ? (Array.isArray(files.image) ? files.image[0] : files.image) : null;
 
     if (!text) {
@@ -63,6 +64,9 @@ export default async function handler(req, res) {
       },
       'sourceTitle': {
         rich_text: [{ text: { content: sourceTitle || '' } }],
+      },
+      'sub': {
+        rich_text: [{ text: { content: sub || '' } }],
       },
     };
 

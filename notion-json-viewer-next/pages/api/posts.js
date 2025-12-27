@@ -5,6 +5,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const { sub } = req.query;
+
   const notion = new Client({
     auth: process.env.NOTION_TOKEN,
   });
@@ -12,9 +14,7 @@ export default async function handler(req, res) {
   try {
     const response = await notion.databases.query({
       database_id: process.env.NOTION_DATABASE_ID,
-      sorts: [
-        { property: 'sub', direction: 'ascending' },
-      ]
+      sorts: [{ timestamp: 'created_time', direction: 'descending' }],
     });
 
     const posts = [];
@@ -28,7 +28,10 @@ export default async function handler(req, res) {
       
       // sub (폴더)
       const subProperty = props['sub'];
-      const sub = subProperty?.rich_text?.[0]?.plain_text || '미분류';
+      const postSub = subProperty?.rich_text?.[0]?.plain_text || '미분류';
+      
+      // sub 필터
+      if (sub && postSub !== sub) continue;
       
       // jsonFile 있는지 확인
       const fileProperty = props['jsonFile'];
@@ -37,23 +40,26 @@ export default async function handler(req, res) {
       if (hasFile) {
         posts.push({
           id: page.id,
-          sub,
+          sub: postSub,
           title,
           createdAt: page.created_time,
         });
       }
     }
 
-    // 폴더별로 그룹화
-    const grouped = {};
-    for (const post of posts) {
-      if (!grouped[post.sub]) {
-        grouped[post.sub] = [];
+    // sub 파라미터가 없으면 폴더별로 그룹화
+    if (!sub) {
+      const grouped = {};
+      for (const post of posts) {
+        if (!grouped[post.sub]) {
+          grouped[post.sub] = [];
+        }
+        grouped[post.sub].push(post);
       }
-      grouped[post.sub].push(post);
+      return res.status(200).json({ posts, grouped });
     }
 
-    res.status(200).json({ posts, grouped });
+    res.status(200).json({ posts });
   } catch (error) {
     console.error('Notion API Error:', error);
     res.status(500).json({ 

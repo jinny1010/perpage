@@ -5,6 +5,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const { sub } = req.query;
+
   const notion = new Client({
     auth: process.env.NOTION_TOKEN,
   });
@@ -18,15 +20,15 @@ export default async function handler(req, res) {
     const bookmarks = response.results.map(page => {
       const props = page.properties;
       
-      // text
       const textProp = props['text'];
       const text = textProp?.rich_text?.[0]?.plain_text || '';
       
-      // sourceTitle
       const sourceProp = props['sourceTitle'];
       const sourceTitle = sourceProp?.rich_text?.[0]?.plain_text || '';
       
-      // image
+      const subProp = props['sub'];
+      const bookmarkSub = subProp?.rich_text?.[0]?.plain_text || '';
+      
       const imageProp = props['image'];
       const imageUrl = imageProp?.files?.[0]?.file?.url || imageProp?.files?.[0]?.external?.url || null;
 
@@ -34,10 +36,11 @@ export default async function handler(req, res) {
         id: page.id,
         text,
         sourceTitle,
+        sub: bookmarkSub,
         imageUrl,
         createdAt: page.created_time,
       };
-    });
+    }).filter(b => !sub || b.sub === sub);
 
     res.status(200).json({ bookmarks });
   } catch (error) {
