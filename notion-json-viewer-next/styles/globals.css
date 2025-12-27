@@ -1163,147 +1163,150 @@ body {
   }
 }
 
-/* ===== 캐러셀 메인 페이지 ===== */
-.carousel-container {
+/* ===== 세로 캐러셀 메인 페이지 ===== */
+.vertical-carousel-container {
   min-height: 100vh;
-  background: #0a0a0a;
+  background: #0f0f0f;
   position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.carousel-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(50px) brightness(0.3);
-  transform: scale(1.2);
-  transition: background-image 0.5s ease;
+.vertical-carousel-title {
+  position: fixed;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  z-index: 100;
+  white-space: nowrap;
 }
 
-.carousel-header {
-  position: relative;
-  z-index: 10;
-  text-align: center;
-  margin-bottom: 40px;
-  color: white;
-}
-
-.carousel-header h1 {
+.vertical-carousel-title span {
   font-size: 48px;
   font-weight: 300;
   font-style: italic;
-  letter-spacing: 4px;
-  margin-bottom: 8px;
+  letter-spacing: 8px;
+  color: rgba(255,255,255,0.15);
   font-family: 'Georgia', serif;
+  text-transform: lowercase;
 }
 
-.carousel-header p {
-  color: rgba(255,255,255,0.6);
-  font-size: 14px;
-}
-
-.carousel-wrapper {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  height: 500px;
+.vertical-carousel-track {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  perspective: 1000px;
+  padding: 40px 0;
+  padding-left: 120px;
+  gap: 30px;
 }
 
-.carousel-track {
-  position: relative;
-  width: 100%;
-  height: 400px;
+.vertical-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.carousel-card {
-  position: absolute;
-  width: 260px;
+.vertical-card:hover {
+  transform: translateX(10px);
+}
+
+.vertical-card-image {
+  width: 280px;
   height: 380px;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-}
-
-.carousel-card.active {
-  cursor: pointer;
-}
-
-.carousel-card-image {
-  position: absolute;
-  inset: 0;
   background-size: cover;
   background-position: center;
-  filter: grayscale(30%) contrast(1.1);
+  filter: grayscale(50%) sepia(20%);
+  border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
 }
 
-.carousel-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+.vertical-card-info {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 24px;
+  padding-top: 20px;
+  color: white;
 }
 
-.carousel-card-number {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 48px;
+.vertical-card-number {
+  font-size: 64px;
   font-weight: 100;
-  color: white;
-  opacity: 0.5;
+  line-height: 1;
   font-family: 'Georgia', serif;
+  margin-bottom: 10px;
 }
 
-.carousel-card-info h3 {
-  color: white;
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.carousel-card-info p {
-  color: rgba(255,255,255,0.6);
-  font-size: 13px;
-}
-
-.carousel-indicators {
+.vertical-card-meta {
   display: flex;
-  gap: 8px;
-  margin-top: 30px;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid rgba(255,255,255,0.3);
+  padding-top: 10px;
 }
 
-.carousel-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,0.3);
-  cursor: pointer;
-  transition: all 0.3s;
+.vertical-card-by {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
-.carousel-indicator.active {
-  background: white;
-  width: 24px;
-  border-radius: 4px;
+.vertical-card-name {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .vertical-carousel-title {
+    position: relative;
+    left: 0;
+    top: 0;
+    transform: none;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  
+  .vertical-carousel-title span {
+    font-size: 32px;
+    color: rgba(255,255,255,0.3);
+  }
+  
+  .vertical-carousel-track {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .vertical-card {
+    flex-direction: column;
+  }
+  
+  .vertical-card-image {
+    width: 100%;
+    height: 400px;
+  }
+  
+  .vertical-card-info {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    padding-top: 15px;
+  }
+  
+  .vertical-card-number {
+    font-size: 48px;
+    margin-bottom: 0;
+  }
+  
+  .vertical-card-meta {
+    border-top: none;
+    border-left: 1px solid rgba(255,255,255,0.3);
+    padding-top: 0;
+    padding-left: 20px;
+  }
 }
 
 /* ===== 이미지 뷰어 (카카오페이지 스타일) ===== */
@@ -1352,15 +1355,8 @@ body {
   aspect-ratio: 3/4;
   background-size: cover;
   background-position: center;
-  border-radius: 0;
   position: relative;
   overflow: hidden;
-}
-
-.image-viewer-dark-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
 }
 
 .image-viewer-text-content {
@@ -1372,14 +1368,18 @@ body {
   justify-content: center;
   padding: 40px 30px;
   text-align: center;
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .image-viewer-main-text {
   color: white;
   font-size: 18px;
   line-height: 2;
-  font-weight: 400;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  font-weight: 500;
+  text-shadow: 
+    0 2px 4px rgba(0,0,0,0.8),
+    0 4px 8px rgba(0,0,0,0.6),
+    0 0 40px rgba(0,0,0,0.4);
   max-height: 70%;
   overflow-y: auto;
   word-break: keep-all;
@@ -1388,12 +1388,13 @@ body {
 .image-viewer-source-info {
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.2);
+  border-top: 1px solid rgba(255,255,255,0.3);
 }
 
 .image-viewer-source-title {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.8);
   font-size: 14px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
 /* 반응형 */

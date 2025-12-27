@@ -13,9 +13,6 @@ export default function ImageViewer({ bookmark, onClose }) {
               : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
           }}
         >
-          {/* 어두운 오버레이 */}
-          <div className="image-viewer-dark-overlay" />
-          
           {/* 텍스트 */}
           <div className="image-viewer-text-content">
             <p className="image-viewer-main-text">{bookmark.text}</p>
