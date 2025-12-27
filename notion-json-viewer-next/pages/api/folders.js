@@ -31,10 +31,25 @@ export default async function handler(req, res) {
       const imageProperty = props['파일과 미디어'];
       const imageUrl = imageProperty?.files?.[0]?.file?.url || imageProperty?.files?.[0]?.external?.url || null;
 
+      // 색상
+      const colorProperty = props['color'];
+      const color = colorProperty?.rich_text?.[0]?.plain_text || '#1a1a2e';
+
+      // YouTube URL
+      const youtubeProperty = props['youtubeUrl'];
+      const youtubeUrl = youtubeProperty?.url || null;
+
+      // 메뉴 이미지
+      const menuProperty = props['menuImage'];
+      const menuImages = menuProperty?.files?.map(f => f.file?.url || f.external?.url).filter(Boolean) || [];
+
       if (sub) {
         folderMap[sub] = {
           name: sub,
           imageUrl,
+          color,
+          youtubeUrl,
+          menuImages,
           count: 0,
         };
       }
@@ -60,6 +75,9 @@ export default async function handler(req, res) {
           folderMap[sub] = {
             name: sub,
             imageUrl: null,
+            color: '#1a1a2e',
+            youtubeUrl: null,
+            menuImages: [],
             count: 1,
           };
         }
