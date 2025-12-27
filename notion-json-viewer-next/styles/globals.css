@@ -820,3 +820,20 @@ body {
     max-width: 95%;
   }
 }
+
+/* ===== 파일 업로드 드롭 영역 ===== */
+.file-drop {
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+  font-size: 14px;
+}
+
+.file-drop:hover {
+  border-color: #4f46e5;
+  background: rgba(79, 70, 229, 0.05);
+}

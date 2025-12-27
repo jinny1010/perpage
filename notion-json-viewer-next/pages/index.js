@@ -21,7 +21,9 @@ export default function Home() {
   // 등록 모달
   const [showModal, setShowModal] = useState(false);
   const [uploadData, setUploadData] = useState({ sub: '', title: '' });
+  const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   // 삭제 확인 모달
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -157,18 +159,29 @@ export default function Home() {
 
     setUploading(true);
     try {
+      const formData = new FormData();
+      formData.append('sub', uploadData.sub);
+      formData.append('title', uploadData.title);
+      if (uploadFile) {
+        formData.append('file', uploadFile);
+      }
+
       const res = await fetch('/api/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(uploadData),
+        body: formData,
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Upload failed');
 
-      alert(`등록 완료!\n\n노션에서 jsonFile에 파일을 직접 업로드해주세요.\n\n${data.notionUrl}`);
+      if (uploadFile) {
+        alert('등록 완료!');
+      } else {
+        alert(`등록 완료!\n\n노션에서 jsonFile에 파일을 직접 업로드해주세요.\n\n${data.notionUrl}`);
+      }
       setShowModal(false);
       setUploadData({ sub: '', title: '' });
+      setUploadFile(null);
       fetchPosts();
     } catch (err) {
       alert('등록 실패: ' + err.message);
@@ -626,7 +639,7 @@ export default function Home() {
 
       {/* 등록 모달 */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={() => { setShowModal(false); setUploadFile(null); }}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>📝 새 글 등록</h3>
             <div className="form-group">
@@ -637,9 +650,29 @@ export default function Home() {
               <label>제목 (title)</label>
               <input type="text" placeholder="게시글 제목" value={uploadData.title} onChange={(e) => setUploadData({...uploadData, title: e.target.value})} />
             </div>
-            <p style={{ fontSize: '13px', color: '#666', marginBottom: '16px' }}>💡 등록 후 노션에서 jsonFile에 파일을 직접 업로드해주세요</p>
+            <div className="form-group">
+              <label>JSON 파일 (선택)</label>
+              <div 
+                className="file-drop"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {uploadFile ? (
+                  <span>📄 {uploadFile.name}</span>
+                ) : (
+                  <span>클릭하여 파일 선택 (.json, .jsonl)</span>
+                )}
+                <input 
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,.jsonl"
+                  onChange={(e) => setUploadFile(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+            <p style={{ fontSize: '13px', color: '#666', marginBottom: '16px' }}>💡 파일 없이 등록하면 노션에서 직접 업로드할 수 있어요</p>
             <div className="modal-buttons">
-              <button className="btn-cancel" onClick={() => setShowModal(false)}>취소</button>
+              <button className="btn-cancel" onClick={() => { setShowModal(false); setUploadFile(null); }}>취소</button>
               <button className="btn-submit" onClick={handleUpload} disabled={uploading}>{uploading ? '등록 중...' : '등록'}</button>
             </div>
           </div>

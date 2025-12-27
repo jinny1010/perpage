@@ -22,9 +22,9 @@ export default async function handler(req, res) {
     for (const page of response.results) {
       const props = page.properties;
       
-      // 이름 (title 타입) - 제목으로 사용
-      const nameProperty = props['이름'];
-      const name = nameProperty?.title?.[0]?.plain_text || '제목 없음';
+      // "이름" 속성 (Title 타입) = 제목
+      const titleProperty = props['이름'];
+      const title = titleProperty?.title?.[0]?.plain_text || '제목 없음';
       
       // sub (폴더)
       const subProperty = props['sub'];
@@ -37,9 +37,8 @@ export default async function handler(req, res) {
       if (hasFile) {
         posts.push({
           id: page.id,
-          name,
           sub,
-          title: name, // 이름을 제목으로 사용
+          title,
           createdAt: page.created_time,
         });
       }
