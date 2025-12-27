@@ -291,7 +291,6 @@ export default function FolderPage() {
 
   const themeColor = folderInfo?.color || '#8B0000';
   const latestBookmarkImage = bookmarks[0]?.imageUrl;
-  const youtubeId = folderInfo?.youtubeUrl?.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/)?.[1];
 
   // 뷰어
   if (selectedPost) {
@@ -404,17 +403,6 @@ export default function FolderPage() {
           <div className="hearts">❤️❤️</div>
         </div>
 
-        {youtubeId && (
-          <div className="dashboard-player">
-            <div className="player-icon">💬</div>
-            <div className="player-info">
-              <small>Now Playing</small>
-              <span>{sub}</span>
-            </div>
-            <button className="player-btn" onClick={() => window.open(folderInfo.youtubeUrl, '_blank')}>▶</button>
-          </div>
-        )}
-
         <div className="dashboard-menu" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
           {(folderInfo?.menuImages?.length > 0 ? folderInfo.menuImages : folderInfo?.imageUrl ? [folderInfo.imageUrl] : []).slice(0, 2).map((img, i) => (
             <div key={i} className="menu-img" style={{ backgroundImage: `url(${img})`, borderColor: themeColor, cursor: 'pointer' }} />
@@ -434,7 +422,7 @@ export default function FolderPage() {
               <h3>{activeTab === 'posts' ? '📄 목록' : '🔖 책갈피'}</h3>
               <div className="list-modal-actions">
                 {activeTab === 'posts' && (
-                  <button className="list-add-btn" onClick={() => setShowModal(true)}>+</button>
+                  <button className="list-add-btn" onClick={() => setShowModal(true)} style={{ background: themeColor }}>+</button>
                 )}
                 <button className="list-modal-close" onClick={() => setActiveTab('')}>✕</button>
               </div>
