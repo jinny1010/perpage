@@ -11,6 +11,102 @@ body {
   color: rgb(27, 28, 30);
 }
 
+/* 전체 컨테이너: 사진처럼 중앙 집중형 레이아웃 */
+.folder-dashboard-v2 {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  position: relative;
+}
+
+/* 상단 가사와 버튼 */
+.top-header-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+.lyrics-text {
+  text-align: right;
+  font-size: 11px;
+  color: #666; /* 색상은 기존 테마에 맞춰 조절 가능 */
+  line-height: 1.4;
+}
+.minimal-btn {
+  background: #8B0000; /* 기존 themeColor 사용 권장 */
+  border: none;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 11px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+/* 메인 그리드 구성: 1.5 : 1 비율 */
+.main-collage-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+/* 음악 위젯 오버레이 */
+.main-image-wrapper {
+  position: relative;
+  border: 1px solid #8B0000;
+  padding: 5px;
+}
+.main-img-frame { width: 100%; display: block; }
+
+.spotify-widget-overlay {
+  position: absolute;
+  top: 50%;
+  right: -20px;
+  transform: translateY(-50%);
+  background: #8B0000;
+  padding: 10px;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 10px 10px 20px rgba(0,0,0,0.3);
+}
+
+/* 숫자 01 아웃라인 스타일 */
+.big-number-outline {
+  font-size: 120px;
+  font-weight: bold;
+  color: transparent;
+  -webkit-text-stroke: 1px #8B0000;
+  line-height: 1;
+  margin-top: 20px;
+}
+
+/* 우측 스택 이미지 */
+.stack-image-box {
+  border: 1px solid #8B0000;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+.stack-image-box img { width: 100%; display: block; }
+.stack-image-box.grayscale { filter: grayscale(1); }
+
+/* 날짜/시간 배지 */
+.meta-info-row {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+.badge-item {
+  background: #8B0000;
+  color: white;
+  padding: 2px 12px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
 /* 게시판 레이아웃 */
 .board-container {
   max-width: 1000px;
