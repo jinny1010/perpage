@@ -213,10 +213,11 @@ export default function Home() {
                     }}
                   />
                   <div className="main-card-info">
-                    <div className="main-card-number" style={{ color: folder.color || '#8B0000' }}>
+                    <div className="main-card-number">
                       {String((index % originalLength.current) + 1).padStart(2, '0')}
                     </div>
-                    <div className="main-card-divider" style={{ backgroundColor: folder.color || '#8B0000' }} />
+                    <div className="main-card-accent" style={{ backgroundColor: folder.color || '#8B0000' }} />
+                    <div className="main-card-divider" />
                     <div className="main-card-meta">
                       <span className="main-card-by">by</span>
                       <span className="main-card-name">{folder.name}</span>
