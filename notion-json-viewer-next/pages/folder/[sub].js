@@ -381,75 +381,56 @@ export default function FolderPage() {
     );
   }
 
-  // 대시보드
+  // 대시보드 v2
   return (
-  <>
-    <Head><title>{sub}</title></Head>
-    <div className="folder-dashboard-v2">
-      
-      {/* 1. 상단 메뉴 구역 (사진 우측 상단 구성) */}
-      <div className="top-header-area">
-        <div className="lyrics-text">
-          And I don't wanna spend it with nobody else...<br/>
-          How am I? Don't nobody know myself.
+    <>
+      <Head><title>{sub}</title></Head>
+      <div className="folder-dashboard-v2">
+        
+        {/* 상단 헤더: 가사 + 버튼들 */}
+        <div className="top-header-area">
+          <div className="lyrics-text" style={{ color: themeColor }}>
+            {bookmarks[0]?.text?.slice(0, 80) || ''}
+          </div>
+          <div className="top-action-buttons">
+            <Link href="/"><button className="minimal-btn" style={{ background: themeColor }}>← Home</button></Link>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
+          </div>
         </div>
-        <div className="top-action-buttons">
-          <button className="minimal-btn">Select</button>
-          <button className="minimal-btn">Select All</button>
-          <button className="minimal-btn active" onClick={() => setActiveTab('posts')}>Posts</button>
-        </div>
-      </div>
 
-      <div className="main-collage-grid">
-        {/* 2. 좌측 메인 구역 */}
-        <div className="collage-left">
-          <div className="main-image-wrapper">
-            <img 
-              src={folderInfo?.imageUrl || "/placeholder.jpg"} 
-              className="main-img-frame" 
-              alt="main"
-            />
-            {/* 스포티파이 스타일 위젯 */}
-            <div className="spotify-widget-overlay">
-              <div className="spot-icon">🎵</div>
-              <div className="spot-info">
-                <div className="spot-title">Careless Whisper</div>
-                <div className="spot-artist">George Michael</div>
-              </div>
-              <div className="spot-controls">◀  ▶  ◼</div>
+        {/* 메인 그리드 */}
+        <div className="main-collage-grid">
+          {/* 좌측 메인 구역 */}
+          <div className="collage-left">
+            <div className="main-image-wrapper" style={{ borderColor: themeColor }}>
+              <img 
+                src={folderInfo?.imageUrl || latestBookmarkImage || '/placeholder.jpg'} 
+                className="main-img-frame" 
+                alt="main"
+              />
+            </div>
+            <div className="meta-info-row">
+              <span className="badge-item" style={{ background: themeColor }}>{new Date().toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')}</span>
+              <span className="badge-item" style={{ background: themeColor }}>{new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+            </div>
+            <div className="deco-footer">
+              <div className="big-number-outline" style={{ WebkitTextStroke: `2px ${themeColor}` }}>{String(folderIndex).padStart(2, '0')}</div>
+              <div className="lamp-icon">🪔</div>
             </div>
           </div>
 
-          <div className="meta-info-row">
-            <span className="badge-item">02.09.22</span>
-            <span className="badge-item">12:22</span>
-          </div>
-
-          <div className="deco-footer">
-            <div className="big-number-outline">01</div>
-            <div className="lamp-icon">🪔</div>
-          </div>
-        </div>
-
-        {/* 3. 우측 이미지 스택 구역 */}
-        <div className="collage-right">
-          <div className="stack-image-box">
-            <img src={latestBookmarkImage || folderInfo?.imageUrl} alt="stack1" />
-          </div>
-          <div className="stack-image-box grayscale">
-            <img src={latestBookmarkImage || folderInfo?.imageUrl} alt="stack2" />
+          {/* 우측 이미지 스택 구역 */}
+          <div className="collage-right" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
+            <div className="stack-image-box" style={{ borderColor: themeColor }}>
+              <img src={latestBookmarkImage || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack1" />
+            </div>
+            <div className="stack-image-box grayscale" style={{ borderColor: themeColor }}>
+              <img src={folderInfo?.menuImages?.[0] || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack2" />
+            </div>
           </div>
         </div>
       </div>
-
-      <Link href="/"><button className="floating-home-btn">← Home</button></Link>
-
-      {/* 탭 버튼 및 나머지 모달 기능은 기존과 동일하게 유지 */}
-      <div className="bottom-nav-tabs">
-        <button onClick={() => setActiveTab('posts')} style={{ background: themeColor }}>목록 ({posts.length})</button>
-        <button onClick={() => setActiveTab('bookmarks')} style={{ background: themeColor }}>책갈피 ({bookmarks.length})</button>
-      </div>
-    </div>
 
       {activeTab && !selectedBookmark && (
         <div className="list-modal-overlay" onClick={() => setActiveTab('')}>
