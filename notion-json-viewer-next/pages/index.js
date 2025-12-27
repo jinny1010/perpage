@@ -7,7 +7,6 @@ export default function Home() {
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
-  const containerRef = useRef(null);
 
   useEffect(() => {
     fetchFolders();
@@ -21,7 +20,13 @@ export default function Home() {
       
       if (!res.ok) throw new Error(data.message || 'Failed to fetch');
       
-      setFolders(data.folders || []);
+      // 무한 루프를 위해 앞뒤로 복제
+      const original = data.folders || [];
+      if (original.length > 0) {
+        setFolders([...original, ...original, ...original]);
+      } else {
+        setFolders([]);
+      }
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
@@ -37,34 +42,35 @@ export default function Home() {
         <title>JSON Viewer</title>
       </Head>
 
-      <div className="vertical-carousel-container" ref={containerRef}>
-        {/* 좌측 타이틀 */}
-        <div className="vertical-carousel-title">
+      <div className="main-scroll-container">
+        {/* 좌측 세로 타이틀 */}
+        <div className="main-side-title">
           <span>ordinary day</span>
         </div>
 
         {loading && (
-          <div className="loading">
+          <div className="loading" style={{ color: 'white' }}>
             <div className="spinner"></div>
             <p>불러오는 중...</p>
           </div>
         )}
 
         {!loading && folders.length === 0 && (
-          <div className="empty-state">
+          <div className="empty-state" style={{ color: 'white' }}>
             <div className="icon">📁</div>
             <p>등록된 캐릭터가 없습니다</p>
           </div>
         )}
 
-        {/* 세로 스크롤 카드들 */}
+        {/* 카드 리스트 */}
         {!loading && folders.length > 0 && (
-          <div className="vertical-carousel-track">
+          <div className="main-cards-wrapper">
             {folders.map((folder, index) => (
-              <Link href={`/folder/${encodeURIComponent(folder.name)}`} key={folder.name}>
-                <div className="vertical-card">
+              <Link href={`/folder/${encodeURIComponent(folder.name)}`} key={`${folder.name}-${index}`}>
+                <div className="main-card-row">
+                  {/* 이미지 */}
                   <div 
-                    className="vertical-card-image"
+                    className="main-card-image"
                     style={{
                       backgroundImage: folder.imageUrl 
                         ? `url(${folder.imageUrl})` 
@@ -73,13 +79,14 @@ export default function Home() {
                   />
                   
                   {/* 우측 정보 */}
-                  <div className="vertical-card-info">
-                    <div className="vertical-card-number">
-                      {String(index + 1).padStart(2, '0')}
+                  <div className="main-card-info">
+                    <div className="main-card-number">
+                      {String((index % Math.ceil(folders.length / 3)) + 1).padStart(2, '0')}
                     </div>
-                    <div className="vertical-card-meta">
-                      <span className="vertical-card-by">by</span>
-                      <span className="vertical-card-name">{folder.name}</span>
+                    <div className="main-card-divider" />
+                    <div className="main-card-meta">
+                      <span className="main-card-by">by</span>
+                      <span className="main-card-name">{folder.name}</span>
                     </div>
                   </div>
                 </div>

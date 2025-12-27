@@ -1163,153 +1163,159 @@ body {
   }
 }
 
-/* ===== 세로 캐러셀 메인 페이지 ===== */
-.vertical-carousel-container {
+/* ===== 메인 스크롤 페이지 ===== */
+.main-scroll-container {
   min-height: 100vh;
-  background: #0f0f0f;
+  background: #0a0a0a;
+  background-image: 
+    radial-gradient(ellipse at center, transparent 0%, #0a0a0a 70%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
   position: relative;
-  overflow-y: auto;
   overflow-x: hidden;
 }
 
-.vertical-carousel-title {
+.main-side-title {
   position: fixed;
-  left: 30px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%) rotate(-90deg);
   transform-origin: left center;
   z-index: 100;
   white-space: nowrap;
+  pointer-events: none;
 }
 
-.vertical-carousel-title span {
-  font-size: 48px;
+.main-side-title span {
+  font-size: 52px;
   font-weight: 300;
   font-style: italic;
-  letter-spacing: 8px;
-  color: rgba(255,255,255,0.15);
-  font-family: 'Georgia', serif;
+  letter-spacing: 6px;
+  color: rgba(255,255,255,0.08);
+  font-family: 'Georgia', 'Times New Roman', serif;
   text-transform: lowercase;
 }
 
-.vertical-carousel-track {
+.main-cards-wrapper {
   display: flex;
   flex-direction: column;
-  padding: 40px 0;
-  padding-left: 120px;
-  gap: 30px;
+  padding: 30px 0;
+  padding-left: 100px;
 }
 
-.vertical-card {
+.main-card-row {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
+  margin-bottom: 20px;
 }
 
-.vertical-card:hover {
-  transform: translateX(10px);
+.main-card-row:hover {
+  transform: translateX(8px);
 }
 
-.vertical-card-image {
+.main-card-image {
   width: 280px;
-  height: 380px;
+  height: 360px;
   background-size: cover;
   background-position: center;
-  filter: grayscale(50%) sepia(20%);
-  border: 1px solid rgba(255,255,255,0.1);
+  filter: grayscale(60%) sepia(30%) contrast(1.1);
+  border: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
 }
 
-.vertical-card-info {
+.main-card-info {
   display: flex;
   flex-direction: column;
-  padding-top: 20px;
+  align-items: flex-start;
+  padding: 15px 20px;
   color: white;
+  height: 360px;
 }
 
-.vertical-card-number {
-  font-size: 64px;
+.main-card-number {
+  font-size: 72px;
   font-weight: 100;
   line-height: 1;
-  font-family: 'Georgia', serif;
-  margin-bottom: 10px;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  letter-spacing: -2px;
 }
 
-.vertical-card-meta {
+.main-card-divider {
+  width: 1px;
+  flex: 1;
+  background: rgba(255,255,255,0.2);
+  margin: 15px 0;
+  margin-left: 35px;
+}
+
+.main-card-meta {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  border-top: 1px solid rgba(255,255,255,0.3);
-  padding-top: 10px;
+  gap: 2px;
 }
 
-.vertical-card-by {
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
-  letter-spacing: 2px;
+.main-card-by {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  text-transform: lowercase;
+  letter-spacing: 1px;
 }
 
-.vertical-card-name {
-  font-size: 14px;
+.main-card-name {
+  font-size: 13px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
 
 /* 반응형 */
 @media (max-width: 768px) {
-  .vertical-carousel-title {
+  .main-side-title {
     position: relative;
     left: 0;
     top: 0;
     transform: none;
-    padding: 30px 20px;
+    padding: 30px 20px 10px;
     text-align: center;
   }
   
-  .vertical-carousel-title span {
-    font-size: 32px;
-    color: rgba(255,255,255,0.3);
+  .main-side-title span {
+    font-size: 36px;
+    color: rgba(255,255,255,0.15);
   }
   
-  .vertical-carousel-track {
-    padding-left: 20px;
-    padding-right: 20px;
+  .main-cards-wrapper {
+    padding-left: 15px;
+    padding-right: 15px;
   }
   
-  .vertical-card {
-    flex-direction: column;
-  }
-  
-  .vertical-card-image {
-    width: 100%;
-    height: 400px;
-  }
-  
-  .vertical-card-info {
+  .main-card-row {
     flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    padding-top: 15px;
   }
   
-  .vertical-card-number {
+  .main-card-image {
+    width: 200px;
+    height: 280px;
+  }
+  
+  .main-card-info {
+    height: 280px;
+    padding: 10px 15px;
+  }
+  
+  .main-card-number {
     font-size: 48px;
-    margin-bottom: 0;
   }
   
-  .vertical-card-meta {
-    border-top: none;
-    border-left: 1px solid rgba(255,255,255,0.3);
-    padding-top: 0;
-    padding-left: 20px;
+  .main-card-divider {
+    margin-left: 22px;
   }
 }
 
-/* ===== 이미지 뷰어 (카카오페이지 스타일) ===== */
+/* ===== 이미지 뷰어 (갤러리 스타일) ===== */
 .image-viewer-overlay {
   position: fixed;
   inset: 0;
@@ -1341,60 +1347,30 @@ body {
   background: rgba(255,255,255,0.2);
 }
 
-.image-viewer-content {
-  max-width: 100%;
-  max-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.image-viewer-fullscreen {
+  max-width: 95vw;
+  max-height: 95vh;
+  object-fit: contain;
 }
 
-.image-viewer-card {
-  width: 100%;
-  max-width: 500px;
-  aspect-ratio: 3/4;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.image-viewer-text-content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 30px;
+.image-viewer-text-only {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 60px 40px;
+  border-radius: 8px;
   text-align: center;
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.image-viewer-main-text {
+  max-width: 500px;
   color: white;
+}
+
+.image-viewer-text-only p {
   font-size: 18px;
-  line-height: 2;
-  font-weight: 500;
-  text-shadow: 
-    0 2px 4px rgba(0,0,0,0.8),
-    0 4px 8px rgba(0,0,0,0.6),
-    0 0 40px rgba(0,0,0,0.4);
-  max-height: 70%;
-  overflow-y: auto;
-  word-break: keep-all;
+  line-height: 1.8;
+  margin-bottom: 16px;
 }
 
-.image-viewer-source-info {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.3);
-}
-
-.image-viewer-source-title {
-  color: rgba(255,255,255,0.8);
+.image-viewer-text-only small {
+  color: rgba(255,255,255,0.6);
   font-size: 14px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
 /* 반응형 */
