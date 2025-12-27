@@ -198,7 +198,9 @@ export default function Home() {
 
         {!loading && folders.length > 0 && (
           <div className="main-cards-wrapper">
-            {folders.map((folder, index) => (
+            {folders.map((folder, index) => {
+              console.log(`Folder ${folder.name} color:`, folder.color);
+              return (
               <Link href={`/folder/${encodeURIComponent(folder.name)}`} key={`${folder.name}-${index}`}>
                 <div 
                   className="main-card-row"
@@ -225,7 +227,7 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            ))}
+            );})}
           </div>
         )}
 
