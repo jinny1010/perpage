@@ -412,7 +412,6 @@ export default function FolderPage() {
             </div>
             <div className="deco-footer">
               <div className="big-number-outline" style={{ WebkitTextStroke: `2px ${themeColor}` }}>{String(folderIndex).padStart(2, '0')}</div>
-              <div className="lamp-icon">🪔</div>
             </div>
           </div>
 
