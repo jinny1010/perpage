@@ -1162,3 +1162,200 @@ body {
     font-size: 16px;
   }
 }
+
+/* ===== 캐러셀 메인 페이지 ===== */
+.carousel-container {
+  min-height: 100vh;
+  background: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(50px) brightness(0.3);
+  transform: scale(1.2);
+  transition: background-image 0.5s ease;
+}
+
+.carousel-header {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.carousel-header h1 {
+  font-size: 48px;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+  font-family: 'Georgia', serif;
+}
+
+.carousel-header p {
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+}
+
+.carousel-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+.carousel-track {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-card {
+  position: absolute;
+  width: 260px;
+  height: 380px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.carousel-card.active {
+  cursor: pointer;
+}
+
+.carousel-card-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(30%) contrast(1.1);
+}
+
+.carousel-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+}
+
+.carousel-card-number {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 48px;
+  font-weight: 100;
+  color: white;
+  opacity: 0.5;
+  font-family: 'Georgia', serif;
+}
+
+.carousel-card-info h3 {
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.carousel-card-info p {
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 8px;
+  margin-top: 30px;
+}
+
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.carousel-indicator.active {
+  background: white;
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ===== 이미지 뷰어 개선 ===== */
+.image-viewer-img {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.image-viewer-no-image {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60px 40px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 500px;
+}
+
+.image-viewer-caption {
+  margin-top: 20px;
+  text-align: center;
+  color: white;
+  max-width: 500px;
+}
+
+.image-viewer-caption p {
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 8px;
+}
+
+.image-viewer-caption small {
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .carousel-header h1 {
+    font-size: 32px;
+  }
+  
+  .carousel-card {
+    width: 200px;
+    height: 300px;
+  }
+  
+  .carousel-wrapper {
+    height: 400px;
+  }
+  
+  .carousel-track {
+    height: 320px;
+  }
+}
