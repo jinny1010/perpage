@@ -199,7 +199,6 @@ export default function Home() {
         {!loading && folders.length > 0 && (
           <div className="main-cards-wrapper">
             {folders.map((folder, index) => {
-              console.log(`Folder ${folder.name} color:`, folder.color);
               return (
               <Link href={`/folder/${encodeURIComponent(folder.name)}`} key={`${folder.name}-${index}`}>
                 <div 
@@ -217,7 +216,7 @@ export default function Home() {
                   <div className="main-card-info">
                     <div className="main-card-number">
                       {String((index % originalLength.current) + 1).padStart(2, '0')}
-                      <div className="main-card-accent" style={{ background: folder.color || '#8B0000' }} />
+                      <div className="main-card-accent" style={{ backgroundColor: folder.color || '#8B0000' }} />
                     </div>
                     <div className="main-card-divider" />
                     <div className="main-card-meta">
