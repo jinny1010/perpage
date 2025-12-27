@@ -242,7 +242,7 @@ export default function FolderPage() {
     try {
       const formData = new FormData();
       formData.append('text', bookmarkModal.text);
-      formData.append('sourceTitle', bookmarkModal.sourceTitle || '');
+      formData.append('sourceTitle', sub); // 폴더 이름으로 저장
       formData.append('sub', sub);
       if (bookmarkImage) formData.append('image', bookmarkImage);
       const res = await fetch('/api/bookmark', { method: 'POST', body: formData });
@@ -403,16 +403,12 @@ export default function FolderPage() {
         <div className="main-collage-grid">
           {/* 좌측 메인 구역 */}
           <div className="collage-left">
-            <div className="main-image-wrapper" style={{ borderColor: themeColor }}>
+            <div className="main-image-wrapper" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
               <img 
                 src={folderInfo?.imageUrl || latestBookmarkImage || '/placeholder.jpg'} 
                 className="main-img-frame" 
                 alt="main"
               />
-            </div>
-            <div className="meta-info-row">
-              <span className="badge-item" style={{ background: themeColor }}>{new Date().toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.').replace(/\.$/, '')}</span>
-              <span className="badge-item" style={{ background: themeColor }}>{new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
             </div>
             <div className="deco-footer">
               <div className="big-number-outline" style={{ WebkitTextStroke: `2px ${themeColor}` }}>{String(folderIndex).padStart(2, '0')}</div>
@@ -420,13 +416,13 @@ export default function FolderPage() {
             </div>
           </div>
 
-          {/* 우측 이미지 스택 구역 */}
-          <div className="collage-right" onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
+          {/* 우측 이미지 스택 구역 - 책갈피 이미지 2개 */}
+          <div className="collage-right">
             <div className="stack-image-box" style={{ borderColor: themeColor }}>
-              <img src={latestBookmarkImage || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack1" />
+              <img src={bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack1" />
             </div>
             <div className="stack-image-box grayscale" style={{ borderColor: themeColor }}>
-              <img src={folderInfo?.menuImages?.[0] || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack2" />
+              <img src={bookmarks[1]?.imageUrl || bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack2" />
             </div>
           </div>
         </div>

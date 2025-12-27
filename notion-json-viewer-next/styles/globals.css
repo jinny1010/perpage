@@ -1257,10 +1257,6 @@ body {
   margin-left: 35px;
 }
 
-.main-card-accent {
-  display: none;
-}
-
 .main-card-meta {
   display: flex;
   flex-direction: column;
