@@ -192,6 +192,32 @@ export default function Home() {
     }
   };
 
+  // 메시지 삭제 (JSONL에서 실제 삭제)
+  const handleDeleteMessage = async (index) => {
+    try {
+      const res = await fetch('/api/deleteMessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pageId: selectedPost.id,
+          messageIndex: index,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      // 로컬에서도 메시지 제거
+      const updatedMessages = [...messages];
+      updatedMessages.splice(index, 1);
+      setMessages(updatedMessages);
+      
+      setDeleteTarget(null);
+    } catch (err) {
+      alert('메시지 삭제 실패: ' + err.message);
+    }
+  };
+
   // 컨텍스트 메뉴
   const handleContextMenu = (e, type, data) => {
     e.preventDefault();
@@ -418,7 +444,13 @@ export default function Home() {
                         <div className="mesIDDisplay">#{index}</div>
                         {tokenCount && <div className="tokenCounterDisplay">{tokenCount}t</div>}
                       </div>
-                      <div className="ch_name">
+                      <div 
+                        className="ch_name"
+                        onContextMenu={(e) => handleContextMenu(e, 'message', { index })}
+                        onTouchStart={(e) => handleTouchStart(e, 'message', { index })}
+                        onTouchEnd={handleTouchEnd}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <span className="name_text">{charName}</span>
                           {timestamp && <small className="timestamp">{timestamp}</small>}
@@ -431,7 +463,13 @@ export default function Home() {
 
                 return (
                   <div key={index} className={`sns-message ${isUser ? 'user' : 'ai'}`}>
-                    <div className="sns-meta">
+                    <div 
+                      className="sns-meta"
+                      onContextMenu={(e) => handleContextMenu(e, 'message', { index })}
+                      onTouchStart={(e) => handleTouchStart(e, 'message', { index })}
+                      onTouchEnd={handleTouchEnd}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <span className="sns-name">{charName}</span>
                       {timestamp && <span className="sns-time">{timestamp}</span>}
                     </div>
@@ -448,11 +486,32 @@ export default function Home() {
         </div>
 
         {/* 컨텍스트 메뉴 */}
-        {contextMenu && contextMenu.type === 'bookmark' && (
+        {contextMenu && (
           <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
-            <button onClick={() => { setBookmarkModal(contextMenu.data); setContextMenu(null); }}>
-              🔖 책갈피 추가
-            </button>
+            {contextMenu.type === 'message' && (
+              <button onClick={() => { setDeleteTarget({ type: 'message', index: contextMenu.data.index }); setContextMenu(null); }}>
+                🗑️ 메시지 삭제
+              </button>
+            )}
+            {contextMenu.type === 'bookmark' && (
+              <button onClick={() => { setBookmarkModal(contextMenu.data); setContextMenu(null); }}>
+                🔖 책갈피 추가
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* 메시지 삭제 확인 모달 */}
+        {deleteTarget?.type === 'message' && (
+          <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h3>⚠️ 메시지 삭제</h3>
+              <p>이 메시지를 삭제하시겠습니까?<br/><small style={{color: '#999'}}>JSONL 파일에서 실제로 삭제됩니다.</small></p>
+              <div className="modal-buttons">
+                <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>취소</button>
+                <button className="btn-submit btn-danger" onClick={() => handleDeleteMessage(deleteTarget.index)}>삭제</button>
+              </div>
+            </div>
           </div>
         )}
 
