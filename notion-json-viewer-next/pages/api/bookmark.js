@@ -54,8 +54,29 @@ export default async function handler(req, res) {
       
       imageUrl = blob.url;
     } else if (existingImageUrl) {
-      // 갤러리에서 선택한 URL 사용
-      imageUrl = existingImageUrl;
+      // 갤러리에서 선택한 URL - Notion URL이면 다운로드해서 재업로드
+      if (existingImageUrl.includes('notion') || existingImageUrl.includes('secure.notion-static.com')) {
+        try {
+          const response = await fetch(existingImageUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          const fileName = `bookmark_${Date.now()}_gallery.jpg`;
+          
+          const blob = await put(fileName, buffer, {
+            access: 'public',
+            contentType: 'image/jpeg',
+          });
+          
+          imageUrl = blob.url;
+        } catch (err) {
+          console.error('Failed to re-upload gallery image:', err);
+          // 실패하면 그냥 URL 사용 시도
+          imageUrl = existingImageUrl;
+        }
+      } else {
+        // 외부 URL은 그대로 사용
+        imageUrl = existingImageUrl;
+      }
     }
 
     // 노션 책갈피 DB에 저장

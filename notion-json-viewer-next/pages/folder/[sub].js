@@ -510,14 +510,14 @@ export default function FolderPage() {
     // infoblock 제거
     content = content.replace(/<infoblock>[\s\S]*?<\/infoblock>/g, '');
     
-    // mes_media_wrapper DIV만 제거 (일반 div는 유지!)
+    // mes_media_wrapper DIV만 제거
     content = content.replace(/<div class="mes_media_wrapper"[\s\S]*?<\/div>\s*<\/div>/g, '');
     
     // 🥨 Sex Position 제거
     content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
     
     // HTML 태그가 있는지 확인 (div, span, table 등)
-    const hasHtmlTags = /<div|<span|<table|<ul|<ol|<p\s|<h[1-6]/i.test(content);
+    const hasHtmlTags = /<div|<span|<table|<ul|<ol/i.test(content);
     
     if (!hasHtmlTags) {
       // HTML이 없으면 마크다운 처리
@@ -528,7 +528,7 @@ export default function FolderPage() {
       // *이탤릭* 처리
       content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
       
-      // "따옴표" 처리 - q 태그 사용하지 않고 span으로 (CSS 중첩 방지)
+      // "따옴표" 처리
       content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
       
       // 줄바꿈 처리
@@ -538,7 +538,7 @@ export default function FolderPage() {
       return `<p>${content}</p>`;
     }
     
-    // HTML이 있으면 그대로 반환 (마크다운 처리 안 함)
+    // HTML이 있으면 그대로 반환
     return content;
   };
 
