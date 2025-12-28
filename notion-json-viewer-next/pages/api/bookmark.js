@@ -34,6 +34,7 @@ export default async function handler(req, res) {
     const sourceTitle = Array.isArray(fields.sourceTitle) ? fields.sourceTitle[0] : fields.sourceTitle;
     const sub = Array.isArray(fields.sub) ? fields.sub[0] : fields.sub;
     const imageFile = files.image ? (Array.isArray(files.image) ? files.image[0] : files.image) : null;
+    const existingImageUrl = Array.isArray(fields.imageUrl) ? fields.imageUrl[0] : fields.imageUrl;
 
     if (!text) {
       return res.status(400).json({ error: 'text is required' });
@@ -41,7 +42,7 @@ export default async function handler(req, res) {
 
     let imageUrl = null;
 
-    // 이미지가 있으면 Blob에 업로드
+    // 이미지 파일이 있으면 Blob에 업로드
     if (imageFile) {
       const fileBuffer = fs.readFileSync(imageFile.filepath);
       const fileName = `bookmark_${Date.now()}_${imageFile.originalFilename || 'image.jpg'}`;
@@ -52,6 +53,9 @@ export default async function handler(req, res) {
       });
       
       imageUrl = blob.url;
+    } else if (existingImageUrl) {
+      // 갤러리에서 선택한 URL 사용
+      imageUrl = existingImageUrl;
     }
 
     // 노션 책갈피 DB에 저장

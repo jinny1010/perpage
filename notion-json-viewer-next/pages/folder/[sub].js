@@ -59,6 +59,10 @@ export default function FolderPage() {
   const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
   const [galleryViewIndex, setGalleryViewIndex] = useState(0);
   const [showGalleryViewer, setShowGalleryViewer] = useState(false);
+  
+  // 책갈피용 갤러리 선택
+  const [showGalleryPicker, setShowGalleryPicker] = useState(false);
+  const [bookmarkImageUrl, setBookmarkImageUrl] = useState(null);
 
   // 제목 수정
   const [editingTitle, setEditingTitle] = useState(false);
@@ -448,13 +452,18 @@ export default function FolderPage() {
       formData.append('text', bookmarkModal.text);
       formData.append('sourceTitle', sub); // 폴더 이름으로 저장
       formData.append('sub', sub);
-      if (bookmarkImage) formData.append('image', bookmarkImage);
+      if (bookmarkImage) {
+        formData.append('image', bookmarkImage);
+      } else if (bookmarkImageUrl) {
+        formData.append('imageUrl', bookmarkImageUrl);
+      }
       const res = await fetch('/api/bookmark', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       showToast('책갈피 저장!', 'success');
       setBookmarkModal(null);
       setBookmarkImage(null);
+      setBookmarkImageUrl(null);
       setSelectedText(null);
       fetchBookmarks();
     } catch (err) {
@@ -507,20 +516,30 @@ export default function FolderPage() {
     // 🥨 Sex Position 제거
     content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
     
-    // **볼드** 처리
-    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // HTML 태그가 있는지 확인 (div, span, table 등)
+    const hasHtmlTags = /<div|<span|<table|<ul|<ol|<p\s|<h[1-6]/i.test(content);
     
-    // *이탤릭* 처리
-    content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    if (!hasHtmlTags) {
+      // HTML이 없으면 마크다운 처리
+      
+      // **볼드** 처리
+      content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      
+      // *이탤릭* 처리
+      content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      
+      // "따옴표" 처리 - q 태그 사용하지 않고 span으로 (CSS 중첩 방지)
+      content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
+      
+      // 줄바꿈 처리
+      content = content.replace(/\n\n+/g, '</p><p>');
+      content = content.replace(/\n/g, '<br>');
+      
+      return `<p>${content}</p>`;
+    }
     
-    // "따옴표" 처리 - HTML 태그 안의 따옴표는 제외
-    content = content.replace(/"([^"<>]+)"/g, '<q>"$1"</q>');
-    
-    // 줄바꿈 처리
-    content = content.replace(/\n\n+/g, '</p><p>');
-    content = content.replace(/\n/g, '<br>');
-    
-    return `<p>${content}</p>`;
+    // HTML이 있으면 그대로 반환 (마크다운 처리 안 함)
+    return content;
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
@@ -631,16 +650,62 @@ export default function FolderPage() {
           </div>
         )}
         {bookmarkModal && (
-          <div className="modal-overlay" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); }}>
+          <div className="modal-overlay" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); setBookmarkImageUrl(null); }}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <h3>🔖 책갈피</h3>
-              <div className="bookmark-preview" style={{ backgroundImage: bookmarkImage ? `url(${URL.createObjectURL(bookmarkImage)})` : `linear-gradient(135deg, ${themeColor}, #111)` }}>
+              <div className="bookmark-preview" style={{ 
+                backgroundImage: bookmarkImage 
+                  ? `url(${URL.createObjectURL(bookmarkImage)})` 
+                  : bookmarkImageUrl 
+                    ? `url(${bookmarkImageUrl})` 
+                    : `linear-gradient(135deg, ${themeColor}, #111)` 
+              }}>
                 <div className="bookmark-preview-overlay"><p>{bookmarkModal.text}</p></div>
               </div>
-              <div className="form-group"><label>이미지</label><input type="file" accept="image/*" onChange={(e) => setBookmarkImage(e.target.files[0])} /></div>
+              <div className="form-group">
+                <label>이미지</label>
+                <div className="bookmark-image-options">
+                  <input type="file" accept="image/*" onChange={(e) => { setBookmarkImage(e.target.files[0]); setBookmarkImageUrl(null); }} />
+                  <button 
+                    type="button" 
+                    className="btn-gallery-pick" 
+                    onClick={async () => { 
+                      if (galleryImages.length === 0) await loadGalleryImages(); 
+                      setShowGalleryPicker(true); 
+                    }}
+                  >
+                    🖼️ 갤러리에서 선택
+                  </button>
+                </div>
+              </div>
               <div className="modal-buttons">
-                <button className="btn-cancel" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); }}>취소</button>
+                <button className="btn-cancel" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); setBookmarkImageUrl(null); }}>취소</button>
                 <button className="btn-submit" onClick={handleSaveBookmark} disabled={bookmarkSaving}>{bookmarkSaving ? '...' : '저장'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* 갤러리 선택 모달 */}
+        {showGalleryPicker && (
+          <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={() => setShowGalleryPicker(false)}>
+            <div className="gallery-picker-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="gallery-modal-header">
+                <h3>🖼️ 이미지 선택</h3>
+                <button className="list-modal-close" onClick={() => setShowGalleryPicker(false)}>✕</button>
+              </div>
+              <div className="gallery-grid">
+                {galleryLoading && <p className="loading-text">로딩 중...</p>}
+                {!galleryLoading && galleryImages.map((img, i) => (
+                  <div key={i} className="gallery-item" onClick={() => { 
+                    setBookmarkImageUrl(img.url); 
+                    setBookmarkImage(null); 
+                    setShowGalleryPicker(false); 
+                  }}>
+                    <img src={img.url} alt={img.name} />
+                  </div>
+                ))}
+                {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
               </div>
             </div>
           </div>
