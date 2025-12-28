@@ -535,7 +535,20 @@ export default function FolderPage() {
       return `<p>${content}</p>`;
     }
     
-    // HTML이 있으면 그대로 반환
+    // HTML이 있으면 이미지 스타일 보정 후 반환
+    // img 태그에 max-width 스타일이 없으면 추가
+    content = content.replace(/<img([^>]*)>/gi, (match, attrs) => {
+      if (!/max-width/i.test(attrs)) {
+        // style 속성이 있으면 거기에 추가, 없으면 새로 생성
+        if (/style\s*=/i.test(attrs)) {
+          return match.replace(/style\s*=\s*"([^"]*)"/i, 'style="$1; max-width: 100%; height: auto;"');
+        } else {
+          return `<img${attrs} style="max-width: 100%; height: auto;">`;
+        }
+      }
+      return match;
+    });
+    
     return content;
   };
 
