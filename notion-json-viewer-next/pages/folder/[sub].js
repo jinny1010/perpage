@@ -578,26 +578,20 @@ export default function FolderPage() {
             <Link href="/"><button className="minimal-btn" style={{ background: themeColor }}>← Home</button></Link>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setShowGalleryModal(true)}>갤러리 ({gallery.length})</button>
           </div>
         </div>
 
         {/* 메인 그리드 */}
         <div className="main-collage-grid">
-          {/* 좌측: 갤러리 슬라이드 */}
+          {/* 좌측 메인 구역 */}
           <div className="collage-left">
-            <div className="gallery-slide-wrapper" style={{ borderColor: themeColor }} onClick={() => setShowGalleryModal(true)}>
-              {favorites.length > 0 ? (
-                <img 
-                  src={favorites[currentSlide]?.imageUrl || '/placeholder.jpg'} 
-                  className="gallery-slide-img" 
-                  alt="gallery"
-                />
-              ) : (
-                <div className="gallery-empty" style={{ color: themeColor }}>
-                  <span>🖼️</span>
-                  <p>갤러리</p>
-                </div>
-              )}
+            <div className="main-image-wrapper" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}>
+              <img 
+                src={favorites.length > 0 ? favorites[currentSlide]?.imageUrl : (folderInfo?.imageUrl || '/placeholder.jpg')} 
+                className="main-img-frame" 
+                alt="main"
+              />
             </div>
             <div className="deco-footer">
               <div className="big-name-display" style={{ WebkitTextStroke: `2px ${themeColor}` }}>
@@ -626,13 +620,13 @@ export default function FolderPage() {
             </div>
           </div>
 
-          {/* 우측: 메인 이미지 + 책갈피 */}
+          {/* 우측 이미지 스택 구역 - 책갈피 이미지 2개 */}
           <div className="collage-right">
-            <div className="stack-image-box main-image" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}>
-              <img src={folderInfo?.imageUrl || '/placeholder.jpg'} alt="main" />
+            <div className="stack-image-box" style={{ borderColor: themeColor }}>
+              <img src={bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack1" />
             </div>
-            <div className="stack-image-box bookmark-image" style={{ borderColor: themeColor }}>
-              <img src={bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="bookmark" />
+            <div className="stack-image-box grayscale" style={{ borderColor: themeColor }}>
+              <img src={bookmarks[1]?.imageUrl || bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack2" />
             </div>
           </div>
         </div>

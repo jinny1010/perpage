@@ -2168,7 +2168,7 @@ a, a:link, a:visited, a:hover, a:active {
 
 .big-name-display .name-last {
   font-size: 80px;
-  margin-left: 120px;
+  margin-left: 60px;
 }
 
 .big-name-display .name-single {
@@ -2184,7 +2184,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
   
   .big-name-display .name-first {
-    font-size: 80px;
+    font-size: 50px;
   }
   
   .big-name-display .name-middle {
@@ -2193,7 +2193,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
   
   .big-name-display .name-last {
-    font-size: 80px;
+    font-size: 50px;
     margin-left: 0;
     text-align: right;
   }
