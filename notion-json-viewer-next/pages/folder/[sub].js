@@ -518,103 +518,14 @@ export default function FolderPage() {
     // *이탤릭* 처리
     content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     
-    // 1단계: 중첩된 <div> 블록 추출
-    const extractDivBlocks = (text) => {
-      let blocks = [];
-      let blockIndex = 0;
-      let result = text;
-      
-      let modified = true;
-      while (modified) {
-        modified = false;
-        const divStart = result.indexOf('<div');
-        if (divStart === -1) break;
-        
-        // 이 <div>의 닫는 태그를 찾기
-        let depth = 0;
-        let endPos = -1;
-        
-        for (let i = divStart; i < result.length; i++) {
-          if (result.substring(i).startsWith('<div')) {
-            depth++;
-            i += 3;
-          } else if (result.substring(i).startsWith('</div>')) {
-            depth--;
-            if (depth === 0) {
-              endPos = i + 6;
-              break;
-            }
-            i += 5;
-          }
-        }
-        
-        if (endPos !== -1) {
-          const fullBlock = result.substring(divStart, endPos);
-          const placeholder = `\n\n___HTMLBLOCK${blockIndex}___\n\n`;
-          blocks.push(fullBlock);
-          result = result.substring(0, divStart) + placeholder + result.substring(endPos);
-          blockIndex++;
-          modified = true;
-        }
-      }
-      
-      // <style> 블록도 추출
-      result = result.replace(/<style>[\s\S]*?<\/style>/g, (match) => {
-        const placeholder = `\n\n___HTMLBLOCK${blockIndex}___\n\n`;
-        blocks.push(match);
-        blockIndex++;
-        return placeholder;
-      });
-      
-      return { result, blocks };
-    };
-    
-    const { result: contentWithPlaceholders, blocks: htmlBlocks } = extractDivBlocks(content);
-    content = contentWithPlaceholders;
-    
-    // 2단계: 남은 HTML 태그를 placeholder로 교체
-    let htmlTags = [];
-    let tagIndex = 0;
-    
-    content = content.replace(/<[^>]+>/g, (match) => {
-      const placeholder = `___TAG${tagIndex}___`;
-      htmlTags.push(match);
-      tagIndex++;
-      return placeholder;
-    });
-    
-    // 3단계: 따옴표 변환
+    // "따옴표" 처리
     content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
     
-    // 4단계: HTML 태그 복원
-    htmlTags.forEach((tag, i) => {
-      content = content.replace(`___TAG${i}___`, tag);
-    });
+    // 줄바꿈 처리
+    content = content.replace(/\n\n+/g, '</p><p>');
+    content = content.replace(/\n/g, '<br>');
     
-    // 5단계: 단락 나누기
-    const paragraphs = content.split(/\n\n+/);
-    const formattedParagraphs = paragraphs.map(p => {
-      const trimmed = p.trim();
-      
-      // HTML 블록 placeholder면 그대로 반환 (p 태그 없이)
-      if (trimmed.startsWith('___HTMLBLOCK')) {
-        return trimmed;
-      }
-      // 빈 줄
-      if (trimmed === '') {
-        return '';
-      }
-      // 일반 텍스트는 p 태그로 감싸기
-      return `<p>${p.replace(/\n/g, '<br>').trim()}</p>`;
-    }).filter(p => p).join('');
-    
-    // 6단계: HTML 블록 복원
-    let finalContent = formattedParagraphs;
-    htmlBlocks.forEach((block, i) => {
-      finalContent = finalContent.replace(`___HTMLBLOCK${i}___`, block);
-    });
-    
-    return finalContent;
+    return `<p>${content}</p>`;
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
