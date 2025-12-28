@@ -58,6 +58,11 @@ export default function FolderPage() {
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
 
+  // 제목 수정
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const titleLongPressTimer = useRef(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('jsonViewerTheme');
@@ -295,6 +300,46 @@ export default function FolderPage() {
     }
   };
 
+  // 제목 수정
+  const handleTitleEdit = () => {
+    setNewTitle(selectedPost.title);
+    setEditingTitle(true);
+  };
+
+  const handleTitleSave = async () => {
+    if (!newTitle.trim()) {
+      showToast('제목을 입력해주세요', 'error');
+      return;
+    }
+    try {
+      const res = await fetch('/api/updateTitle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageId: selectedPost.id, title: newTitle })
+      });
+      if (!res.ok) throw new Error('수정 실패');
+      
+      setSelectedPost({ ...selectedPost, title: newTitle });
+      setPosts(posts.map(p => p.id === selectedPost.id ? { ...p, title: newTitle } : p));
+      setEditingTitle(false);
+      showToast('제목 수정 완료!', 'success');
+    } catch (err) {
+      showToast('제목 수정 실패', 'error');
+    }
+  };
+
+  const handleTitleLongPress = (e) => {
+    titleLongPressTimer.current = setTimeout(() => {
+      handleTitleEdit();
+    }, 500);
+  };
+
+  const handleTitleLongPressEnd = () => {
+    if (titleLongPressTimer.current) {
+      clearTimeout(titleLongPressTimer.current);
+    }
+  };
+
   const openPost = async (post) => {
     setSelectedPost(post);
     setViewerLoading(true);
@@ -442,7 +487,32 @@ export default function FolderPage() {
         {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
         <div className="viewer-container">
           <div className={`viewer-header ${showHeader ? '' : 'hidden'}`}>
-            <h2>{selectedPost.title}</h2>
+            {editingTitle ? (
+              <div className="title-edit-wrapper">
+                <input 
+                  type="text" 
+                  value={newTitle} 
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTitleSave()}
+                  autoFocus
+                  className="title-edit-input"
+                />
+                <button onClick={handleTitleSave} className="title-edit-btn">✓</button>
+                <button onClick={() => setEditingTitle(false)} className="title-edit-btn cancel">✕</button>
+              </div>
+            ) : (
+              <h2 
+                onContextMenu={(e) => { e.preventDefault(); handleTitleEdit(); }}
+                onTouchStart={handleTitleLongPress}
+                onTouchEnd={handleTitleLongPressEnd}
+                onMouseDown={handleTitleLongPress}
+                onMouseUp={handleTitleLongPressEnd}
+                onMouseLeave={handleTitleLongPressEnd}
+                style={{ cursor: 'pointer' }}
+              >
+                {selectedPost.title}
+              </h2>
+            )}
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <select value={theme} onChange={(e) => setTheme(Number(e.target.value))} className="theme-select">
                 <option value={1}>테마 1</option>
