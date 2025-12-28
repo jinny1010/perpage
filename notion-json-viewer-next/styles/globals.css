@@ -2168,7 +2168,7 @@ a, a:link, a:visited, a:hover, a:active {
 
 .big-name-display .name-last {
   font-size: 80px;
-  margin-left: 60px;
+  margin-left: 120px;
 }
 
 .big-name-display .name-single {
@@ -2184,7 +2184,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
   
   .big-name-display .name-first {
-    font-size: 50px;
+    font-size: 80px;
   }
   
   .big-name-display .name-middle {
@@ -2193,7 +2193,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
   
   .big-name-display .name-last {
-    font-size: 50px;
+    font-size: 80px;
     margin-left: 0;
     text-align: right;
   }
@@ -2256,5 +2256,151 @@ a, a:link, a:visited, a:hover, a:active {
   
   .stack-image-box {
     flex: 1;
+  }
+}
+
+/* ===== 갤러리 슬라이드 ===== */
+.gallery-slide-wrapper {
+  border: 3px solid;
+  padding: 5px;
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.gallery-slide-wrapper:hover {
+  transform: scale(1.02);
+}
+
+.gallery-slide-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-empty {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+.gallery-empty span {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.gallery-empty p {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* 갤러리 모달 */
+.gallery-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gallery-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.gallery-modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.gallery-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-favorite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.gallery-favorite.active {
+  background: #ffd700;
+}
+
+.gallery-item:hover .gallery-favorite {
+  transform: scale(1.1);
+}
+
+/* 우측 이미지 조정 */
+.collage-right .main-image img {
+  height: 250px;
+  object-fit: cover;
+}
+
+.collage-right .bookmark-image img {
+  height: 200px;
+  object-fit: cover;
+}
+
+/* 모바일 갤러리 */
+@media (max-width: 768px) {
+  .gallery-slide-img,
+  .gallery-empty {
+    height: 280px;
+  }
+  
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .collage-right .main-image img,
+  .collage-right .bookmark-image img {
+    height: 150px;
   }
 }

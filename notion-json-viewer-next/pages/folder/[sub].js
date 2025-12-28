@@ -51,6 +51,17 @@ export default function FolderPage() {
   const themeFileRef = useRef(null);
   const [customCss, setCustomCss] = useState('');
 
+  // 갤러리
+  const [gallery, setGallery] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [showAddGalleryModal, setShowAddGalleryModal] = useState(false);
+  const [newGalleryImage, setNewGalleryImage] = useState(null);
+  const [newGalleryName, setNewGalleryName] = useState('');
+  const [addingGallery, setAddingGallery] = useState(false);
+  const galleryImageRef = useRef(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('jsonViewerTheme');
@@ -70,6 +81,7 @@ export default function FolderPage() {
       fetchPosts();
       fetchBookmarks();
       fetchThemes();
+      fetchGallery();
     }
   }, [sub]);
 
@@ -87,6 +99,17 @@ export default function FolderPage() {
       setCustomCss('');
     }
   }, [theme, customThemes]);
+
+  // 갤러리 슬라이드 (2분마다 랜덤)
+  useEffect(() => {
+    if (favorites.length > 1) {
+      const interval = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * favorites.length);
+        setCurrentSlide(randomIndex);
+      }, 120000); // 2분
+      return () => clearInterval(interval);
+    }
+  }, [favorites]);
 
   useEffect(() => {
     if (selectedPost && viewerRef.current && !viewerLoading) {
@@ -215,6 +238,62 @@ export default function FolderPage() {
       showToast('테마 추가 실패: ' + err.message, 'error');
     } finally {
       setAddingTheme(false);
+    }
+  };
+
+  const fetchGallery = async () => {
+    try {
+      const res = await fetch(`/api/gallery?sub=${encodeURIComponent(sub)}`);
+      const data = await res.json();
+      if (res.ok) {
+        setGallery(data.gallery || []);
+        setFavorites((data.gallery || []).filter(g => g.favorite));
+      }
+    } catch (err) {
+      console.error('갤러리 로드 실패:', err);
+    }
+  };
+
+  const handleAddGallery = async () => {
+    if (!newGalleryImage) {
+      showToast('이미지를 선택해주세요', 'error');
+      return;
+    }
+    setAddingGallery(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', newGalleryName);
+      formData.append('sub', sub);
+      formData.append('image', newGalleryImage);
+
+      const res = await fetch('/api/addGallery', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      showToast('이미지 추가 완료!', 'success');
+      setShowAddGalleryModal(false);
+      setNewGalleryName('');
+      setNewGalleryImage(null);
+      fetchGallery();
+    } catch (err) {
+      showToast('추가 실패: ' + err.message, 'error');
+    } finally {
+      setAddingGallery(false);
+    }
+  };
+
+  const toggleFavorite = async (item) => {
+    try {
+      const res = await fetch('/api/toggleFavorite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageId: item.id, favorite: !item.favorite })
+      });
+      if (res.ok) {
+        fetchGallery();
+      }
+    } catch (err) {
+      showToast('즐겨찾기 변경 실패', 'error');
     }
   };
 
@@ -504,21 +583,27 @@ export default function FolderPage() {
 
         {/* 메인 그리드 */}
         <div className="main-collage-grid">
-          {/* 좌측 메인 구역 */}
+          {/* 좌측: 갤러리 슬라이드 */}
           <div className="collage-left">
-            <div className="main-image-wrapper" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); }}>
-              <img 
-                src={folderInfo?.imageUrl || latestBookmarkImage || '/placeholder.jpg'} 
-                className="main-img-frame" 
-                alt="main"
-              />
+            <div className="gallery-slide-wrapper" style={{ borderColor: themeColor }} onClick={() => setShowGalleryModal(true)}>
+              {favorites.length > 0 ? (
+                <img 
+                  src={favorites[currentSlide]?.imageUrl || '/placeholder.jpg'} 
+                  className="gallery-slide-img" 
+                  alt="gallery"
+                />
+              ) : (
+                <div className="gallery-empty" style={{ color: themeColor }}>
+                  <span>🖼️</span>
+                  <p>갤러리</p>
+                </div>
+              )}
             </div>
             <div className="deco-footer">
               <div className="big-name-display" style={{ WebkitTextStroke: `2px ${themeColor}` }}>
                 {(() => {
                   const nameParts = sub.split(' ');
                   if (nameParts.length === 3) {
-                    // First Middle Last
                     return (
                       <>
                         <span className="name-first">{nameParts[0]}</span>
@@ -527,7 +612,6 @@ export default function FolderPage() {
                       </>
                     );
                   } else if (nameParts.length === 2) {
-                    // First Last
                     return (
                       <>
                         <span className="name-first">{nameParts[0]}</span>
@@ -542,17 +626,80 @@ export default function FolderPage() {
             </div>
           </div>
 
-          {/* 우측 이미지 스택 구역 - 책갈피 이미지 2개 */}
+          {/* 우측: 메인 이미지 + 책갈피 */}
           <div className="collage-right">
-            <div className="stack-image-box" style={{ borderColor: themeColor }}>
-              <img src={bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack1" />
+            <div className="stack-image-box main-image" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}>
+              <img src={folderInfo?.imageUrl || '/placeholder.jpg'} alt="main" />
             </div>
-            <div className="stack-image-box grayscale" style={{ borderColor: themeColor }}>
-              <img src={bookmarks[1]?.imageUrl || bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack2" />
+            <div className="stack-image-box bookmark-image" style={{ borderColor: themeColor }}>
+              <img src={bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="bookmark" />
             </div>
           </div>
         </div>
       </div>
+
+      {/* 갤러리 모달 */}
+      {showGalleryModal && (
+        <div className="modal-overlay" onClick={() => setShowGalleryModal(false)}>
+          <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="gallery-modal-header">
+              <h3>🖼️ 갤러리</h3>
+              <div className="gallery-modal-actions">
+                <button className="list-add-btn" onClick={() => setShowAddGalleryModal(true)} style={{ background: themeColor }}>+</button>
+                <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
+              </div>
+            </div>
+            <div className="gallery-grid">
+              {gallery.map((item) => (
+                <div key={item.id} className="gallery-item" onClick={() => toggleFavorite(item)}>
+                  <img src={item.imageUrl} alt={item.name} />
+                  <div className={`gallery-favorite ${item.favorite ? 'active' : ''}`}>
+                    {item.favorite ? '⭐' : '☆'}
+                  </div>
+                </div>
+              ))}
+              {gallery.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 갤러리 추가 모달 */}
+      {showAddGalleryModal && (
+        <div className="modal-overlay" onClick={() => setShowAddGalleryModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>🖼️ 이미지 추가</h3>
+            <div className="form-group">
+              <label>이름 (선택)</label>
+              <input 
+                type="text" 
+                value={newGalleryName} 
+                onChange={(e) => setNewGalleryName(e.target.value)}
+                placeholder="이미지 설명"
+              />
+            </div>
+            <div className="form-group">
+              <label>이미지</label>
+              <div className="file-drop" onClick={() => galleryImageRef.current?.click()}>
+                {newGalleryImage ? `📷 ${newGalleryImage.name}` : '클릭하여 이미지 선택'}
+                <input 
+                  ref={galleryImageRef}
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => setNewGalleryImage(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => setShowAddGalleryModal(false)}>취소</button>
+              <button className="btn-submit" onClick={handleAddGallery} disabled={addingGallery}>
+                {addingGallery ? '추가 중...' : '추가'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeTab && !selectedBookmark && (
         <div className="list-modal-overlay" onClick={() => setActiveTab('')}>
