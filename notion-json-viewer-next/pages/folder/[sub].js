@@ -243,7 +243,6 @@ export default function FolderPage() {
       const data = await res.json();
       if (res.ok) {
         setGallery(data.gallery || []);
-        setFavorites((data.gallery || []).filter(g => g.favorite));
       }
     } catch (err) {
       console.error('갤러리 로드 실패:', err);
@@ -510,36 +509,23 @@ export default function FolderPage() {
     // infoblock 제거
     content = content.replace(/<infoblock>[\s\S]*?<\/infoblock>/g, '');
     
-    // mes_media_wrapper DIV만 제거
-    content = content.replace(/<div class="mes_media_wrapper"[\s\S]*?<\/div>\s*<\/div>/g, '');
-    
     // 🥨 Sex Position 제거
     content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
     
-    // HTML 태그가 있는지 확인 (div, span, table 등)
-    const hasHtmlTags = /<div|<span|<table|<ul|<ol/i.test(content);
+    // **볼드** 처리
+    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     
-    if (!hasHtmlTags) {
-      // HTML이 없으면 마크다운 처리
-      
-      // **볼드** 처리
-      content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      
-      // *이탤릭* 처리
-      content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      
-      // "따옴표" 처리
-      content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
-      
-      // 줄바꿈 처리
-      content = content.replace(/\n\n+/g, '</p><p>');
-      content = content.replace(/\n/g, '<br>');
-      
-      return `<p>${content}</p>`;
-    }
+    // *이탤릭* 처리
+    content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     
-    // HTML이 있으면 그대로 반환
-    return content;
+    // "따옴표" 처리
+    content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
+    
+    // 줄바꿈 처리
+    content = content.replace(/\n\n+/g, '</p><p>');
+    content = content.replace(/\n/g, '<br>');
+    
+    return `<p>${content}</p>`;
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
