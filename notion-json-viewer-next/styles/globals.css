@@ -1243,9 +1243,9 @@ body {
   letter-spacing: -2px;
   text-decoration: none !important;
   border-bottom: none !important;
+  color: white !important;
 }
 .main-card-number span {
-  text-decoration: none !important;
   display: block;
 }
 .main-card-accent {
@@ -1269,9 +1269,6 @@ a *, a:link *, a:visited *, a:hover *, a:active * {
   text-decoration: none !important;
 }
 
-.main-card-number {
-  text-decoration: none !important;
-}
 
 .main-card-divider {
   width: 1px;
