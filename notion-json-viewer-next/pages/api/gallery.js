@@ -22,33 +22,39 @@ export default async function handler(req, res) {
       filter
     });
 
-    const gallery = response.results.map(page => {
+    const gallery = [];
+    
+    response.results.forEach(page => {
       const props = page.properties;
       const name = props['이름']?.title?.[0]?.plain_text || '';
       const subValue = props['sub']?.rich_text?.[0]?.plain_text || '';
       const favorite = props['즐겨찾기']?.checkbox || false;
-      const file = props['파일과 미디어']?.files?.[0];
-      let fileUrl = file?.file?.url || file?.external?.url || null;
-      const fileName = file?.name || '';
-      const isZip = fileName.toLowerCase().endsWith('.zip');
+      const files = props['파일과 미디어']?.files || [];
+      
+      // 한 행의 모든 파일 처리
+      files.forEach((file, index) => {
+        let fileUrl = file?.file?.url || file?.external?.url || null;
+        const fileName = file?.name || '';
+        const isZip = fileName.toLowerCase().endsWith('.zip');
 
-      // Google Drive URL 변환
-      if (fileUrl && fileUrl.includes('drive.google.com/file/d/')) {
-        const match = fileUrl.match(/\/d\/([^\/]+)/);
-        if (match) {
-          fileUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        // Google Drive URL 변환
+        if (fileUrl && fileUrl.includes('drive.google.com/file/d/')) {
+          const match = fileUrl.match(/\/d\/([^\/]+)/);
+          if (match) {
+            fileUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+          }
         }
-      }
 
-      return {
-        id: page.id,
-        name,
-        sub: subValue,
-        favorite,
-        fileUrl,
-        fileName,
-        isZip
-      };
+        gallery.push({
+          id: `${page.id}_${index}`,
+          name: name || fileName,
+          sub: subValue,
+          favorite,
+          fileUrl,
+          fileName,
+          isZip
+        });
+      });
     });
 
     res.status(200).json({ gallery });

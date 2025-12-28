@@ -688,7 +688,7 @@ export default function FolderPage() {
         
         {/* 갤러리 선택 모달 */}
         {showGalleryPicker && (
-          <div className="modal-overlay" style={{ zIndex: 1100 }} onClick={() => setShowGalleryPicker(false)}>
+          <div className="gallery-picker-overlay" onClick={() => setShowGalleryPicker(false)}>
             <div className="gallery-picker-modal" onClick={(e) => e.stopPropagation()}>
               <div className="gallery-modal-header">
                 <h3>🖼️ 이미지 선택</h3>
