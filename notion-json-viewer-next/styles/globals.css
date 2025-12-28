@@ -4,7 +4,6 @@
   box-sizing: border-box;
 }
 
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -1243,33 +1242,7 @@ body {
   letter-spacing: -2px;
   text-decoration: underline;
   text-decoration-thickness: 3px;
-  border-bottom: none !important;
-  color: white !important;
 }
-.main-card-number span {
-  display: block;
-}
-.main-card-accent {
-  width: 100%;
-  height: 3px;
-  margin-top: 8px;
-  background: #8B0000;
-}
-
-/* 링크 스타일 완전 리셋 */
-a, a:link, a:visited, a:hover, a:active,
-a *, a:link *, a:visited *, a:hover *, a:active * {
-  color: inherit;
-  text-decoration: none !important;
-  border-bottom: none !important;
-}
-
-.main-card-row,
-.main-card-row * {
-  color: inherit;
-  text-decoration: none !important;
-}
-
 
 .main-card-divider {
   width: 1px;
