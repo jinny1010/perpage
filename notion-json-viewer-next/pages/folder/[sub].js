@@ -300,7 +300,7 @@ export default function FolderPage() {
         <div className="viewer-container">
           <div className={`viewer-header ${showHeader ? '' : 'hidden'}`}>
             <h2>{selectedPost.title}</h2>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <select value={theme} onChange={(e) => setTheme(Number(e.target.value))} className="theme-select">
                 <option value={1}>테마 1</option>
                 <option value={2}>테마 2</option>
@@ -436,7 +436,6 @@ export default function FolderPage() {
                   }
                 })()}
               </div>
-              <div className="lamp-icon">🪔</div>
             </div>
           </div>
 
