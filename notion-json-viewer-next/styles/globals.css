@@ -11,6 +11,26 @@ body {
   color: rgb(27, 28, 30);
 }
 
+/* 메시지 내 DIV 블록의 position: absolute 문제 해결 */
+.mes_text div[style*="position: absolute"],
+.sns-bubble div[style*="position: absolute"] {
+  position: relative !important;
+}
+
+/* 또는 메시지 컨테이너에 relative 추가 */
+.mes_text,
+.sns-bubble {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 메시지 내 모든 div에 containment 적용 */
+.mes_text > div,
+.sns-bubble > div {
+  position: relative !important;
+  max-width: 100% !important;
+}
+
 /* 게시판 레이아웃 */
 .board-container {
   max-width: 1000px;
