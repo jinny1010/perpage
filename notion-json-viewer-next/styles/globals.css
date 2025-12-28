@@ -823,8 +823,8 @@ body {
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
-  padding-bottom: 100px;
+  padding: 20px 16px;
+  padding-bottom: 50px;
 }
 
 /* 스크롤바 커스텀 */
@@ -2168,7 +2168,7 @@ a, a:link, a:visited, a:hover, a:active {
 
 .big-name-display .name-last {
   font-size: 80px;
-  margin-left: 60px;
+  margin-left: 120px;
 }
 
 .big-name-display .name-single {
@@ -2184,7 +2184,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
   
   .big-name-display .name-first {
-    font-size: 50px;
+    font-size: 80px;
   }
   
   .big-name-display .name-middle {
@@ -2193,13 +2193,13 @@ a, a:link, a:visited, a:hover, a:active {
   }
   
   .big-name-display .name-last {
-    font-size: 50px;
-    margin-left: 0;
+    font-size: 80px;
+    margin-left: 120px;
     text-align: right;
   }
   
   .big-name-display .name-single {
-    font-size: 50px;
+    font-size: 80px;
   }
 }
 

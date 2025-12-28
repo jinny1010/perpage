@@ -100,17 +100,6 @@ export default function FolderPage() {
     }
   }, [theme, customThemes]);
 
-  // 갤러리 슬라이드 (2분마다 랜덤)
-  useEffect(() => {
-    if (favorites.length > 1) {
-      const interval = setInterval(() => {
-        const randomIndex = Math.floor(Math.random() * favorites.length);
-        setCurrentSlide(randomIndex);
-      }, 120000); // 2분
-      return () => clearInterval(interval);
-    }
-  }, [favorites]);
-
   useEffect(() => {
     if (selectedPost && viewerRef.current && !viewerLoading) {
       const savedPosition = localStorage.getItem(`scroll_${selectedPost.id}`);
@@ -588,7 +577,7 @@ export default function FolderPage() {
           <div className="collage-left">
             <div className="main-image-wrapper" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}>
               <img 
-                src={favorites.length > 0 ? favorites[currentSlide]?.imageUrl : (folderInfo?.imageUrl || '/placeholder.jpg')} 
+                src={folderInfo?.imageUrl || '/placeholder.jpg'} 
                 className="main-img-frame" 
                 alt="main"
               />
