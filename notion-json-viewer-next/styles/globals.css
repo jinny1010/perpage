@@ -1240,9 +1240,14 @@ body {
   line-height: 1;
   font-family: 'Georgia', 'Times New Roman', serif;
   letter-spacing: -2px;
-  text-decoration: underline;
-  text-decoration-thickness: 3px;
-  text-decoration-color: inherit !important;
+  text-decoration: none !important;
+  display: inline-block;
+  border-bottom: 3px solid;
+  padding-bottom: 5px;
+}
+
+a, a:link, a:visited, a:hover, a:active {
+  text-decoration: none !important;
 }
 
 .main-card-divider {
@@ -2085,6 +2090,36 @@ body {
   color: transparent;
   line-height: 1;
   font-family: 'Georgia', serif;
+}
+
+.big-name-display {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  color: transparent;
+  font-family: 'Georgia', serif;
+  line-height: 1;
+}
+
+.big-name-display .name-first {
+  font-size: 80px;
+}
+
+.big-name-display .name-middle {
+  font-size: 24px;
+  margin-left: 40px;
+  margin-top: -5px;
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+}
+
+.big-name-display .name-last {
+  font-size: 80px;
+  margin-left: 20px;
+}
+
+.big-name-display .name-single {
+  font-size: 80px;
 }
 
 .lamp-icon {

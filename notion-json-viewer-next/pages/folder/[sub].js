@@ -411,7 +411,31 @@ export default function FolderPage() {
               />
             </div>
             <div className="deco-footer">
-              <div className="big-number-outline" style={{ WebkitTextStroke: `2px ${themeColor}` }}>{sub}</div>
+              <div className="big-name-display" style={{ WebkitTextStroke: `2px ${themeColor}` }}>
+                {(() => {
+                  const nameParts = sub.split(' ');
+                  if (nameParts.length === 3) {
+                    // First Middle Last
+                    return (
+                      <>
+                        <span className="name-first">{nameParts[0]}</span>
+                        <span className="name-middle">{nameParts[1]}</span>
+                        <span className="name-last">{nameParts[2]}</span>
+                      </>
+                    );
+                  } else if (nameParts.length === 2) {
+                    // First Last
+                    return (
+                      <>
+                        <span className="name-first">{nameParts[0]}</span>
+                        <span className="name-last">{nameParts[1]}</span>
+                      </>
+                    );
+                  } else {
+                    return <span className="name-single">{sub}</span>;
+                  }
+                })()}
+              </div>
               <div className="lamp-icon">🪔</div>
             </div>
           </div>
