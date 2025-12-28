@@ -1241,7 +1241,8 @@ body {
   line-height: 1;
   font-family: 'Georgia', 'Times New Roman', serif;
   letter-spacing: -2px;
-  text-decoration: none !important;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
   border-bottom: none !important;
   color: white !important;
 }
