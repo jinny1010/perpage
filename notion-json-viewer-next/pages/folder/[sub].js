@@ -239,12 +239,12 @@ export default function FolderPage() {
     }
   };
 
-  // ZIP 파일에서 이미지 추출
+  // 모든 ZIP 파일에서 이미지 추출
   const loadGalleryImages = async () => {
     if (gallery.length === 0) return;
     
-    const zipItem = gallery.find(g => g.isZip && g.fileUrl);
-    if (!zipItem) {
+    const zipItems = gallery.filter(g => g.isZip && g.fileUrl);
+    if (zipItems.length === 0) {
       setGalleryImages([]);
       return;
     }
@@ -252,28 +252,35 @@ export default function FolderPage() {
     setGalleryLoading(true);
     try {
       const JSZip = (await import('jszip')).default;
-      const response = await fetch(zipItem.fileUrl);
-      const blob = await response.blob();
-      const zip = await JSZip.loadAsync(blob);
-      
-      const images = [];
+      const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
-      for (const [filename, file] of Object.entries(zip.files)) {
-        if (file.dir) continue;
-        const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
-        if (imageExtensions.includes(ext)) {
-          const imageBlob = await file.async('blob');
-          const imageUrl = URL.createObjectURL(imageBlob);
-          images.push({ name: filename, url: imageUrl });
+      // 모든 ZIP 파일 처리
+      for (const zipItem of zipItems) {
+        try {
+          const response = await fetch(zipItem.fileUrl);
+          const blob = await response.blob();
+          const zip = await JSZip.loadAsync(blob);
+          
+          for (const [filename, file] of Object.entries(zip.files)) {
+            if (file.dir) continue;
+            const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+            if (imageExtensions.includes(ext)) {
+              const imageBlob = await file.async('blob');
+              const imageUrl = URL.createObjectURL(imageBlob);
+              allImages.push({ name: filename, url: imageUrl, zipName: zipItem.name });
+            }
+          }
+        } catch (err) {
+          console.error(`ZIP 로드 실패 (${zipItem.name}):`, err);
         }
       }
       
       // 파일명 정렬
-      images.sort((a, b) => a.name.localeCompare(b.name));
-      setGalleryImages(images);
+      allImages.sort((a, b) => a.name.localeCompare(b.name));
+      setGalleryImages(allImages);
     } catch (err) {
-      console.error('ZIP 로드 실패:', err);
+      console.error('갤러리 로드 실패:', err);
       showToast('갤러리 로드 실패', 'error');
     } finally {
       setGalleryLoading(false);
