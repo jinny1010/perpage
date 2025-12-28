@@ -492,11 +492,9 @@ export default function FolderPage() {
       <Head><title>{sub}</title></Head>
       <div className="folder-dashboard-v2">
         
-        {/* 상단 헤더: 가사 + 버튼들 */}
+        {/* 상단 헤더: 버튼들 */}
         <div className="top-header-area">
-          <div className="lyrics-text" style={{ color: themeColor }}>
-            {bookmarks[0]?.text?.slice(0, 80) || ''}
-          </div>
+          <div></div>
           <div className="top-action-buttons">
             <Link href="/"><button className="minimal-btn" style={{ background: themeColor }}>← Home</button></Link>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>

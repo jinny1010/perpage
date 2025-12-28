@@ -2175,6 +2175,34 @@ a, a:link, a:visited, a:hover, a:active {
   font-size: 80px;
 }
 
+/* 모바일 이름 레이아웃 */
+@media (max-width: 768px) {
+  .big-name-display {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .big-name-display .name-first {
+    font-size: 50px;
+  }
+  
+  .big-name-display .name-middle {
+    font-size: 18px;
+    margin-left: 40px;
+  }
+  
+  .big-name-display .name-last {
+    font-size: 50px;
+    margin-left: 0;
+    text-align: right;
+  }
+  
+  .big-name-display .name-single {
+    font-size: 50px;
+  }
+}
+
 .collage-right {
   display: flex;
   flex-direction: column;
