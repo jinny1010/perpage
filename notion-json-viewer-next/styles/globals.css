@@ -1243,7 +1243,7 @@ body {
   text-decoration: none !important;
   display: inline-block;
   border-bottom: 3px solid;
-  padding-bottom: 5px;
+  padding-bottom: 0px;
 }
 
 a, a:link, a:visited, a:hover, a:active {
@@ -2107,7 +2107,7 @@ a, a:link, a:visited, a:hover, a:active {
 
 .big-name-display .name-middle {
   font-size: 24px;
-  margin-left: 40px;
+  margin-left: 80px;
   margin-top: -5px;
   margin-bottom: 5px;
   letter-spacing: 2px;
@@ -2115,7 +2115,7 @@ a, a:link, a:visited, a:hover, a:active {
 
 .big-name-display .name-last {
   font-size: 80px;
-  margin-left: 20px;
+  margin-left: 60px;
 }
 
 .big-name-display .name-single {

@@ -219,7 +219,7 @@ export default function Home() {
                     </div>
                     <div className="main-card-divider" />
                     <div className="main-card-meta">
-                      <span className="main-card-by">by</span>
+                      <span className="main-card-by" style={{ color: folder.color || '#8B0000' }}>by</span>
                       <span className="main-card-name">{folder.name}</span>
                     </div>
                   </div>
