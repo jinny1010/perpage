@@ -51,16 +51,12 @@ export default function FolderPage() {
   const themeFileRef = useRef(null);
   const [customCss, setCustomCss] = useState('');
 
-  // 갤러리
+  // 갤러리 (ZIP 방식)
   const [gallery, setGallery] = useState([]);
-  const [favorites, setFavorites] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
   const [showGalleryModal, setShowGalleryModal] = useState(false);
-  const [showAddGalleryModal, setShowAddGalleryModal] = useState(false);
-  const [newGalleryImage, setNewGalleryImage] = useState(null);
-  const [newGalleryName, setNewGalleryName] = useState('');
-  const [addingGallery, setAddingGallery] = useState(false);
-  const galleryImageRef = useRef(null);
+  const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -243,46 +239,52 @@ export default function FolderPage() {
     }
   };
 
-  const handleAddGallery = async () => {
-    if (!newGalleryImage) {
-      showToast('이미지를 선택해주세요', 'error');
+  // ZIP 파일에서 이미지 추출
+  const loadGalleryImages = async () => {
+    if (gallery.length === 0) return;
+    
+    const zipItem = gallery.find(g => g.isZip && g.fileUrl);
+    if (!zipItem) {
+      setGalleryImages([]);
       return;
     }
-    setAddingGallery(true);
+
+    setGalleryLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('name', newGalleryName);
-      formData.append('sub', sub);
-      formData.append('image', newGalleryImage);
-
-      const res = await fetch('/api/addGallery', { method: 'POST', body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-
-      showToast('이미지 추가 완료!', 'success');
-      setShowAddGalleryModal(false);
-      setNewGalleryName('');
-      setNewGalleryImage(null);
-      fetchGallery();
+      const JSZip = (await import('jszip')).default;
+      const response = await fetch(zipItem.fileUrl);
+      const blob = await response.blob();
+      const zip = await JSZip.loadAsync(blob);
+      
+      const images = [];
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+      
+      for (const [filename, file] of Object.entries(zip.files)) {
+        if (file.dir) continue;
+        const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+        if (imageExtensions.includes(ext)) {
+          const imageBlob = await file.async('blob');
+          const imageUrl = URL.createObjectURL(imageBlob);
+          images.push({ name: filename, url: imageUrl });
+        }
+      }
+      
+      // 파일명 정렬
+      images.sort((a, b) => a.name.localeCompare(b.name));
+      setGalleryImages(images);
     } catch (err) {
-      showToast('추가 실패: ' + err.message, 'error');
+      console.error('ZIP 로드 실패:', err);
+      showToast('갤러리 로드 실패', 'error');
     } finally {
-      setAddingGallery(false);
+      setGalleryLoading(false);
     }
   };
 
-  const toggleFavorite = async (item) => {
-    try {
-      const res = await fetch('/api/toggleFavorite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pageId: item.id, favorite: !item.favorite })
-      });
-      if (res.ok) {
-        fetchGallery();
-      }
-    } catch (err) {
-      showToast('즐겨찾기 변경 실패', 'error');
+  // 갤러리 모달 열 때 이미지 로드
+  const openGallery = async () => {
+    setShowGalleryModal(true);
+    if (galleryImages.length === 0) {
+      await loadGalleryImages();
     }
   };
 
@@ -567,7 +569,7 @@ export default function FolderPage() {
             <Link href="/"><button className="minimal-btn" style={{ background: themeColor }}>← Home</button></Link>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
-            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setShowGalleryModal(true)}>갤러리 ({gallery.length})</button>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={openGallery}>갤러리</button>
           </div>
         </div>
 
@@ -627,61 +629,28 @@ export default function FolderPage() {
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
             <div className="gallery-modal-header">
               <h3>🖼️ 갤러리</h3>
-              <div className="gallery-modal-actions">
-                <button className="list-add-btn" onClick={() => setShowAddGalleryModal(true)} style={{ background: themeColor }}>+</button>
-                <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
-              </div>
+              <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
             </div>
             <div className="gallery-grid">
-              {gallery.map((item) => (
-                <div key={item.id} className="gallery-item" onClick={() => toggleFavorite(item)}>
-                  <img src={item.imageUrl} alt={item.name} />
-                  <div className={`gallery-favorite ${item.favorite ? 'active' : ''}`}>
-                    {item.favorite ? '⭐' : '☆'}
-                  </div>
+              {galleryLoading && <p className="loading-text">로딩 중...</p>}
+              {!galleryLoading && galleryImages.map((img, i) => (
+                <div key={i} className="gallery-item" onClick={() => setSelectedGalleryImage(img)}>
+                  <img src={img.url} alt={img.name} />
                 </div>
               ))}
-              {gallery.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
+              {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
             </div>
           </div>
         </div>
       )}
 
-      {/* 갤러리 추가 모달 */}
-      {showAddGalleryModal && (
-        <div className="modal-overlay" onClick={() => setShowAddGalleryModal(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>🖼️ 이미지 추가</h3>
-            <div className="form-group">
-              <label>이름 (선택)</label>
-              <input 
-                type="text" 
-                value={newGalleryName} 
-                onChange={(e) => setNewGalleryName(e.target.value)}
-                placeholder="이미지 설명"
-              />
-            </div>
-            <div className="form-group">
-              <label>이미지</label>
-              <div className="file-drop" onClick={() => galleryImageRef.current?.click()}>
-                {newGalleryImage ? `📷 ${newGalleryImage.name}` : '클릭하여 이미지 선택'}
-                <input 
-                  ref={galleryImageRef}
-                  type="file" 
-                  accept="image/*"
-                  onChange={(e) => setNewGalleryImage(e.target.files[0])}
-                  style={{ display: 'none' }}
-                />
-              </div>
-            </div>
-            <div className="modal-buttons">
-              <button className="btn-cancel" onClick={() => setShowAddGalleryModal(false)}>취소</button>
-              <button className="btn-submit" onClick={handleAddGallery} disabled={addingGallery}>
-                {addingGallery ? '추가 중...' : '추가'}
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* 갤러리 이미지 확대 보기 */}
+      {selectedGalleryImage && (
+        <ImageViewer 
+          src={selectedGalleryImage.url} 
+          alt={selectedGalleryImage.name}
+          onClose={() => setSelectedGalleryImage(null)}
+        />
       )}
 
       {activeTab && !selectedBookmark && (

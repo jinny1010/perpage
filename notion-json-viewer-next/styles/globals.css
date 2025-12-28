@@ -2407,3 +2407,11 @@ a, a:link, a:visited, a:hover, a:active {
     height: 150px;
   }
 }
+
+/* 갤러리 로딩 */
+.loading-text {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+  grid-column: 1 / -1;
+}
