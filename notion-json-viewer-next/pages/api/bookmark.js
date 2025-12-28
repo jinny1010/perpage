@@ -54,10 +54,18 @@ export default async function handler(req, res) {
       
       imageUrl = blob.url;
     } else if (existingImageUrl) {
-      // 갤러리에서 선택한 URL - Notion URL이면 다운로드해서 재업로드
-      if (existingImageUrl.includes('notion') || existingImageUrl.includes('secure.notion-static.com')) {
+      // Notion URL인지 확인
+      const isNotionUrl = existingImageUrl.includes('notion') || 
+                          existingImageUrl.includes('secure.notion-static.com') ||
+                          existingImageUrl.includes('prod-files-secure');
+      
+      if (isNotionUrl) {
+        // Notion URL은 반드시 다운로드해서 재업로드해야 함
         try {
           const response = await fetch(existingImageUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image: ${response.status}`);
+          }
           const arrayBuffer = await response.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
           const fileName = `bookmark_${Date.now()}_gallery.jpg`;
@@ -69,12 +77,13 @@ export default async function handler(req, res) {
           
           imageUrl = blob.url;
         } catch (err) {
-          console.error('Failed to re-upload gallery image:', err);
-          // 실패하면 그냥 URL 사용 시도
-          imageUrl = existingImageUrl;
+          console.error('Failed to re-upload Notion image:', err);
+          // Notion URL은 external로 사용 불가하므로, 이미지 없이 진행
+          // (에러를 던지지 않고 imageUrl을 null로 유지)
+          imageUrl = null;
         }
       } else {
-        // 외부 URL은 그대로 사용
+        // 외부 URL은 그대로 사용 가능
         imageUrl = existingImageUrl;
       }
     }
@@ -95,7 +104,7 @@ export default async function handler(req, res) {
       },
     };
 
-    // 이미지 URL이 있으면 추가
+    // 이미지 URL이 있고, Notion URL이 아닌 경우만 추가
     if (imageUrl) {
       properties['image'] = {
         files: [{
