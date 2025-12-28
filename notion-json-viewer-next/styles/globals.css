@@ -1244,7 +1244,10 @@ body {
   text-decoration: none !important;
   border-bottom: none !important;
 }
-
+.main-card-number span {
+  text-decoration: none !important;
+  display: block;
+}
 .main-card-accent {
   width: 100%;
   height: 3px;
