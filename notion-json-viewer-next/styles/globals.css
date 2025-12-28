@@ -2183,6 +2183,13 @@ a, a:link, a:visited, a:hover, a:active {
   font-size: 80px;
 }
 
+/* 긴 이름용 작은 폰트 */
+.big-name-display .name-first.small,
+.big-name-display .name-last.small,
+.big-name-display .name-single.small {
+  font-size: 60px;
+}
+
 /* 모바일 이름 레이아웃 */
 @media (max-width: 768px) {
   .big-name-display {
@@ -2208,6 +2215,13 @@ a, a:link, a:visited, a:hover, a:active {
   
   .big-name-display .name-single {
     font-size: 80px;
+  }
+  
+  /* 모바일 긴 이름용 */
+  .big-name-display .name-first.small,
+  .big-name-display .name-last.small,
+  .big-name-display .name-single.small {
+    font-size: 50px;
   }
 }
 

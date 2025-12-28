@@ -665,23 +665,27 @@ export default function FolderPage() {
               <div className="big-name-display" style={{ WebkitTextStroke: `2px ${themeColor}` }}>
                 {(() => {
                   const nameParts = sub.split(' ');
+                  // 가장 긴 단어 길이 체크
+                  const maxLen = Math.max(...nameParts.map(p => p.length));
+                  const isLong = maxLen > 8;
+                  
                   if (nameParts.length === 3) {
                     return (
                       <>
-                        <span className="name-first">{nameParts[0]}</span>
+                        <span className={`name-first ${isLong ? 'small' : ''}`}>{nameParts[0]}</span>
                         <span className="name-middle">{nameParts[1]}</span>
-                        <span className="name-last">{nameParts[2]}</span>
+                        <span className={`name-last ${isLong ? 'small' : ''}`}>{nameParts[2]}</span>
                       </>
                     );
                   } else if (nameParts.length === 2) {
                     return (
                       <>
-                        <span className="name-first">{nameParts[0]}</span>
-                        <span className="name-last">{nameParts[1]}</span>
+                        <span className={`name-first ${isLong ? 'small' : ''}`}>{nameParts[0]}</span>
+                        <span className={`name-last ${isLong ? 'small' : ''}`}>{nameParts[1]}</span>
                       </>
                     );
                   } else {
-                    return <span className="name-single">{sub}</span>;
+                    return <span className={`name-single ${isLong ? 'small' : ''}`}>{sub}</span>;
                   }
                 })()}
               </div>
