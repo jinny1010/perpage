@@ -459,16 +459,53 @@ export default function FolderPage() {
 
   const formatMessage = (content) => {
     if (!content) return '';
+    
+    // OOC 처리
     content = content.replace(/\(??[Oo][Oo][Cc]\s*:[\s\S]*$/gm, (m) => `<details><summary>OOC</summary>${m}</details>`);
-    content = content.replace(/(?:```?\w*[\r\n]?)?<(thought|cot|thinking|CoT|think|starter)[\s\S]*?<\/(thought|cot|thinking|CoT|think|starter)>(?:[\r\n]?```?)?/g, '');
+    
+    // Updated Timeline 처리
+    content = content.replace(/### \*\*Updated Timeline\*\*[\s\S]*$/gm, (m) => `<details><summary>Updated Timeline</summary>${m}</details>`);
+    
+    // ### 로 시작하는 OOC 숨김
+    content = content.replace(/^###.*[\s\S]*$/gm, (m) => `<details><summary>OOC Hidden</summary>${m}</details>`);
+    
+    // thought/cot/thinking 태그 제거
+    content = content.replace(/(?:```?\w*[\r\n]?)?<(thought|cot|thinking|CoT|think|starter)([\s\S]*?)<\/(thought|cot|thinking|CoT|think|starter)>(?:[\r\n]?```?)?/g, '');
+    
+    // imageinfo 태그 제거
     content = content.replace(/<[Ii][Mm][Aa][Gg][Ee][Ii][Nn][Ff][Oo]>[\s\S]*?<\/[Ii][Mm][Aa][Gg][Ee][Ii][Nn][Ff][Oo]>/g, '');
-    content = content.replace(/<pic[\s\S]*?(?:<\/pic>|$)/g, '');
+    
+    // pic 태그 제거 (다양한 형태)
+    content = content.replace(/<\/pic>/g, '');
+    content = content.replace(/<pic\s+prompt="[^"]*"\s*\/?>[\s\S]*?(?:<\/pic>)?/g, '');
+    content = content.replace(/<pic>[\s\S]*?<\/pic>/g, '');
+    content = content.replace(/<pic\s+prompt="[^"]*"\s*\/?>\s*[^<]*/g, '');
+    
+    // infoblock 제거
     content = content.replace(/<infoblock>[\s\S]*?<\/infoblock>/g, '');
-    content = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    content = content.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    
+    // mes_media_wrapper DIV 제거
+    content = content.replace(/<div class="mes_media_wrapper"[\s\S]*?<\/div>\s*<\/div>/g, '');
+    
+    // 일반 div 태그 제거 (내용은 유지)
+    content = content.replace(/<\/?div[^>]*>/g, '');
+    
+    // 🥨 Sex Position 제거
+    content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
+    
+    // **볼드** 처리
+    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    
+    // *이탤릭* 처리
+    content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // "따옴표" 처리
     content = content.replace(/"([^"]+)"/g, '<q>"$1"</q>');
+    
+    // 줄바꿈 처리
     content = content.replace(/\n\n+/g, '</p><p>');
     content = content.replace(/\n/g, '<br>');
+    
     return `<p>${content}</p>`;
   };
 

@@ -19,8 +19,7 @@ export default async function handler(req, res) {
 
     const response = await notion.databases.query({
       database_id: process.env.NOTION_GALLERY_DB_ID,
-      filter,
-      sorts: [{ property: '생성일', direction: 'descending' }]
+      filter
     });
 
     const gallery = response.results.map(page => {
