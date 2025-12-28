@@ -2470,3 +2470,105 @@ a, a:link, a:visited, a:hover, a:active {
 .title-edit-btn.cancel {
   background: #f44336;
 }
+
+/* 갤러리 슬라이드 뷰어 */
+.gallery-viewer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-viewer {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-viewer img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  font-size: 48px;
+  width: 60px;
+  height: 80px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.gallery-nav:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.gallery-nav.prev {
+  left: -80px;
+}
+
+.gallery-nav.next {
+  right: -80px;
+}
+
+.gallery-counter {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 14px;
+}
+
+.gallery-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+}
+
+/* 모바일 갤러리 뷰어 */
+@media (max-width: 768px) {
+  .gallery-nav {
+    width: 40px;
+    height: 60px;
+    font-size: 32px;
+  }
+  
+  .gallery-nav.prev {
+    left: 10px;
+  }
+  
+  .gallery-nav.next {
+    right: 10px;
+  }
+  
+  .gallery-close {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .gallery-counter {
+    bottom: 20px;
+  }
+}

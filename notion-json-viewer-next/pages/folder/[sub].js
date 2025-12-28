@@ -57,6 +57,8 @@ export default function FolderPage() {
   const [galleryLoading, setGalleryLoading] = useState(false);
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
+  const [galleryViewIndex, setGalleryViewIndex] = useState(0);
+  const [showGalleryViewer, setShowGalleryViewer] = useState(false);
 
   // 제목 수정
   const [editingTitle, setEditingTitle] = useState(false);
@@ -244,45 +246,60 @@ export default function FolderPage() {
     }
   };
 
-  // 모든 ZIP 파일에서 이미지 추출
+  // 모든 ZIP 파일 + 일반 이미지에서 추출
   const loadGalleryImages = async () => {
-    if (gallery.length === 0) return;
-    
-    const zipItems = gallery.filter(g => g.isZip && g.fileUrl);
-    if (zipItems.length === 0) {
+    if (gallery.length === 0) {
       setGalleryImages([]);
       return;
     }
 
     setGalleryLoading(true);
     try {
-      const JSZip = (await import('jszip')).default;
       const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
-      // 모든 ZIP 파일 처리
-      for (const zipItem of zipItems) {
-        try {
-          const response = await fetch(zipItem.fileUrl);
-          const blob = await response.blob();
-          const zip = await JSZip.loadAsync(blob);
-          
-          for (const [filename, file] of Object.entries(zip.files)) {
-            if (file.dir) continue;
-            const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
-            if (imageExtensions.includes(ext)) {
-              const imageBlob = await file.async('blob');
-              const imageUrl = URL.createObjectURL(imageBlob);
-              allImages.push({ name: filename, url: imageUrl, zipName: zipItem.name });
+      // ZIP 파일들
+      const zipItems = gallery.filter(g => g.isZip && g.fileUrl);
+      
+      // 일반 이미지 파일들
+      const imageItems = gallery.filter(g => {
+        if (!g.fileUrl || g.isZip) return false;
+        const ext = g.fileName?.toLowerCase() || g.fileUrl.toLowerCase();
+        return imageExtensions.some(e => ext.includes(e));
+      });
+
+      // 일반 이미지 추가
+      for (const img of imageItems) {
+        allImages.push({ name: img.name || img.fileName, url: img.fileUrl });
+      }
+
+      // ZIP 파일 처리
+      if (zipItems.length > 0) {
+        const JSZip = (await import('jszip')).default;
+        
+        for (const zipItem of zipItems) {
+          try {
+            const response = await fetch(zipItem.fileUrl);
+            const blob = await response.blob();
+            const zip = await JSZip.loadAsync(blob);
+            
+            for (const [filename, file] of Object.entries(zip.files)) {
+              if (file.dir) continue;
+              const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+              if (imageExtensions.includes(ext)) {
+                const imageBlob = await file.async('blob');
+                const imageUrl = URL.createObjectURL(imageBlob);
+                allImages.push({ name: filename, url: imageUrl, zipName: zipItem.name });
+              }
             }
+          } catch (err) {
+            console.error(`ZIP 로드 실패 (${zipItem.name}):`, err);
           }
-        } catch (err) {
-          console.error(`ZIP 로드 실패 (${zipItem.name}):`, err);
         }
       }
       
       // 파일명 정렬
-      allImages.sort((a, b) => a.name.localeCompare(b.name));
+      allImages.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       setGalleryImages(allImages);
     } catch (err) {
       console.error('갤러리 로드 실패:', err);
@@ -484,11 +501,8 @@ export default function FolderPage() {
     // infoblock 제거
     content = content.replace(/<infoblock>[\s\S]*?<\/infoblock>/g, '');
     
-    // mes_media_wrapper DIV 제거
+    // mes_media_wrapper DIV만 제거 (일반 div는 유지!)
     content = content.replace(/<div class="mes_media_wrapper"[\s\S]*?<\/div>\s*<\/div>/g, '');
-    
-    // 일반 div 태그 제거 (내용은 유지)
-    content = content.replace(/<\/?div[^>]*>/g, '');
     
     // 🥨 Sex Position 제거
     content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
@@ -499,8 +513,8 @@ export default function FolderPage() {
     // *이탤릭* 처리
     content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     
-    // "따옴표" 처리
-    content = content.replace(/"([^"]+)"/g, '<q>"$1"</q>');
+    // "따옴표" 처리 - HTML 태그 안의 따옴표는 제외
+    content = content.replace(/"([^"<>]+)"/g, '<q>"$1"</q>');
     
     // 줄바꿈 처리
     content = content.replace(/\n\n+/g, '</p><p>');
@@ -752,7 +766,7 @@ export default function FolderPage() {
             <div className="gallery-grid">
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
               {!galleryLoading && galleryImages.map((img, i) => (
-                <div key={i} className="gallery-item" onClick={() => setSelectedGalleryImage(img)}>
+                <div key={i} className="gallery-item" onClick={() => { setGalleryViewIndex(i); setShowGalleryViewer(true); }}>
                   <img src={img.url} alt={img.name} />
                 </div>
               ))}
@@ -762,13 +776,17 @@ export default function FolderPage() {
         </div>
       )}
 
-      {/* 갤러리 이미지 확대 보기 */}
-      {selectedGalleryImage && (
-        <ImageViewer 
-          src={selectedGalleryImage.url} 
-          alt={selectedGalleryImage.name}
-          onClose={() => setSelectedGalleryImage(null)}
-        />
+      {/* 갤러리 슬라이드 뷰어 */}
+      {showGalleryViewer && galleryImages.length > 0 && (
+        <div className="gallery-viewer-overlay" onClick={() => setShowGalleryViewer(false)}>
+          <div className="gallery-viewer" onClick={(e) => e.stopPropagation()}>
+            <button className="gallery-nav prev" onClick={() => setGalleryViewIndex((galleryViewIndex - 1 + galleryImages.length) % galleryImages.length)}>‹</button>
+            <img src={galleryImages[galleryViewIndex]?.url} alt={galleryImages[galleryViewIndex]?.name} />
+            <button className="gallery-nav next" onClick={() => setGalleryViewIndex((galleryViewIndex + 1) % galleryImages.length)}>›</button>
+            <div className="gallery-counter">{galleryViewIndex + 1} / {galleryImages.length}</div>
+            <button className="gallery-close" onClick={() => setShowGalleryViewer(false)}>✕</button>
+          </div>
+        </div>
       )}
 
       {activeTab && !selectedBookmark && (

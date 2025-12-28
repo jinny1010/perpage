@@ -28,9 +28,17 @@ export default async function handler(req, res) {
       const subValue = props['sub']?.rich_text?.[0]?.plain_text || '';
       const favorite = props['즐겨찾기']?.checkbox || false;
       const file = props['파일과 미디어']?.files?.[0];
-      const fileUrl = file?.file?.url || file?.external?.url || null;
+      let fileUrl = file?.file?.url || file?.external?.url || null;
       const fileName = file?.name || '';
       const isZip = fileName.toLowerCase().endsWith('.zip');
+
+      // Google Drive URL 변환
+      if (fileUrl && fileUrl.includes('drive.google.com/file/d/')) {
+        const match = fileUrl.match(/\/d\/([^\/]+)/);
+        if (match) {
+          fileUrl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+        }
+      }
 
       return {
         id: page.id,
