@@ -41,6 +41,15 @@ export default function FolderPage() {
   
   // 모바일 선택 텍스트 버튼
   const [selectedText, setSelectedText] = useState(null);
+  
+  // 커스텀 테마
+  const [customThemes, setCustomThemes] = useState([]);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [newThemeName, setNewThemeName] = useState('');
+  const [newThemeCss, setNewThemeCss] = useState(null);
+  const [addingTheme, setAddingTheme] = useState(false);
+  const themeFileRef = useRef(null);
+  const [customCss, setCustomCss] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -60,8 +69,24 @@ export default function FolderPage() {
       fetchFolderInfo();
       fetchPosts();
       fetchBookmarks();
+      fetchThemes();
     }
   }, [sub]);
+
+  // 커스텀 테마 CSS 적용
+  useEffect(() => {
+    if (theme > 2 && customThemes.length > 0) {
+      const selectedTheme = customThemes.find((t, i) => i + 3 === theme);
+      if (selectedTheme?.cssUrl) {
+        fetch(selectedTheme.cssUrl)
+          .then(res => res.text())
+          .then(css => setCustomCss(css))
+          .catch(err => console.error('CSS 로드 실패:', err));
+      }
+    } else {
+      setCustomCss('');
+    }
+  }, [theme, customThemes]);
 
   useEffect(() => {
     if (selectedPost && viewerRef.current && !viewerLoading) {
@@ -150,6 +175,46 @@ export default function FolderPage() {
       console.error(err);
     } finally {
       setBookmarksLoading(false);
+    }
+  };
+
+  const fetchThemes = async () => {
+    try {
+      const res = await fetch(`/api/themes?sub=${encodeURIComponent(sub)}`);
+      const data = await res.json();
+      if (res.ok) {
+        setCustomThemes(data.themes || []);
+      }
+    } catch (err) {
+      console.error('테마 로드 실패:', err);
+    }
+  };
+
+  const handleAddTheme = async () => {
+    if (!newThemeName.trim() || !newThemeCss) {
+      showToast('테마 이름과 CSS 파일을 입력해주세요', 'error');
+      return;
+    }
+    setAddingTheme(true);
+    try {
+      const formData = new FormData();
+      formData.append('name', newThemeName);
+      formData.append('sub', sub);
+      formData.append('cssFile', newThemeCss);
+
+      const res = await fetch('/api/addTheme', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      showToast('테마 추가 완료!', 'success');
+      setShowThemeModal(false);
+      setNewThemeName('');
+      setNewThemeCss(null);
+      fetchThemes();
+    } catch (err) {
+      showToast('테마 추가 실패: ' + err.message, 'error');
+    } finally {
+      setAddingTheme(false);
     }
   };
 
@@ -297,6 +362,7 @@ export default function FolderPage() {
     return (
       <>
         <Head><title>{selectedPost.title}</title></Head>
+        {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
         <div className="viewer-container">
           <div className={`viewer-header ${showHeader ? '' : 'hidden'}`}>
             <h2>{selectedPost.title}</h2>
@@ -304,7 +370,11 @@ export default function FolderPage() {
               <select value={theme} onChange={(e) => setTheme(Number(e.target.value))} className="theme-select">
                 <option value={1}>테마 1</option>
                 <option value={2}>테마 2</option>
+                {customThemes.map((t, i) => (
+                  <option key={t.id} value={i + 3}>{t.name}</option>
+                ))}
               </select>
+              <button className="btn-add-theme" onClick={() => setShowThemeModal(true)}>+</button>
               <button className="btn-back" onClick={() => { closeViewer(); setActiveTab('posts'); }}>← 목록</button>
             </div>
           </div>
@@ -373,6 +443,41 @@ export default function FolderPage() {
               <div className="modal-buttons">
                 <button className="btn-cancel" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); }}>취소</button>
                 <button className="btn-submit" onClick={handleSaveBookmark} disabled={bookmarkSaving}>{bookmarkSaving ? '...' : '저장'}</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {showThemeModal && (
+          <div className="modal-overlay" onClick={() => setShowThemeModal(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h3>🎨 테마 추가</h3>
+              <div className="form-group">
+                <label>테마 이름</label>
+                <input 
+                  type="text" 
+                  value={newThemeName} 
+                  onChange={(e) => setNewThemeName(e.target.value)}
+                  placeholder="예: 다크모드"
+                />
+              </div>
+              <div className="form-group">
+                <label>CSS 파일</label>
+                <div className="file-drop" onClick={() => themeFileRef.current?.click()}>
+                  {newThemeCss ? `📄 ${newThemeCss.name}` : '클릭하여 CSS 파일 선택'}
+                  <input 
+                    ref={themeFileRef}
+                    type="file" 
+                    accept=".css"
+                    onChange={(e) => setNewThemeCss(e.target.files[0])}
+                    style={{ display: 'none' }}
+                  />
+                </div>
+              </div>
+              <div className="modal-buttons">
+                <button className="btn-cancel" onClick={() => setShowThemeModal(false)}>취소</button>
+                <button className="btn-submit" onClick={handleAddTheme} disabled={addingTheme}>
+                  {addingTheme ? '추가 중...' : '추가'}
+                </button>
               </div>
             </div>
           </div>
