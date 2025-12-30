@@ -554,7 +554,6 @@ export default function FolderPage() {
     });
     
     return `<p>${content}</p>`;
-  };
     
     // HTML이 있으면 이미지 스타일 보정 후 반환
     // img 태그에 max-width 스타일이 없으면 추가
