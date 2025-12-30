@@ -513,27 +513,48 @@ export default function FolderPage() {
     // 🥨 Sex Position 제거
     content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
     
-    // HTML 태그가 있는지 확인 (div, span, table 등)
-    const hasHtmlTags = /<div|<span|<table|<ul|<ol/i.test(content);
+    // HTML 블록(div) 추출 후 마크다운 처리
+    const htmlBlocks = [];
+    content = content.replace(/<div[\s\S]*?<\/div>/gi, (match) => {
+      const placeholder = `__HTML_BLOCK_${htmlBlocks.length}__`;
+      // position: absolute를 relative로 변경
+      let fixed = match.replace(/position:\s*absolute/gi, 'position: relative');
+      // img에 max-width 추가
+      fixed = fixed.replace(/<img([^>]*)>/gi, (m, attrs) => {
+        if (!/max-width/i.test(attrs)) {
+          if (/style\s*=/i.test(attrs)) {
+            return m.replace(/style\s*=\s*"([^"]*)"/i, 'style="$1; max-width: 100%; height: auto;"');
+          } else {
+            return `<img${attrs} style="max-width: 100%; height: auto;">`;
+          }
+        }
+        return m;
+      });
+      htmlBlocks.push(fixed);
+      return placeholder;
+    });
     
-    if (!hasHtmlTags) {
-      // HTML이 없으면 마크다운 처리
-      
-      // **볼드** 처리
-      content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      
-      // *이탤릭* 처리
-      content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      
-      // "따옴표" 처리
-      content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
-      
-      // 줄바꿈 처리
-      content = content.replace(/\n\n+/g, '</p><p>');
-      content = content.replace(/\n/g, '<br>');
-      
-      return `<p>${content}</p>`;
-    }
+    // 마크다운 처리 (DIV 제외한 텍스트)
+    // **볼드** 처리
+    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    
+    // *이탤릭* 처리
+    content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // "따옴표" 처리
+    content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
+    
+    // 줄바꿈 처리
+    content = content.replace(/\n\n+/g, '</p><p>');
+    content = content.replace(/\n/g, '<br>');
+    
+    // HTML 블록 복원
+    htmlBlocks.forEach((block, i) => {
+      content = content.replace(`__HTML_BLOCK_${i}__`, block);
+    });
+    
+    return `<p>${content}</p>`;
+  };
     
     // HTML이 있으면 이미지 스타일 보정 후 반환
     // img 태그에 max-width 스타일이 없으면 추가
