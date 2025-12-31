@@ -2416,9 +2416,7 @@ a, a:link, a:visited, a:hover, a:active {
 
 .gallery-modal-header h3 {
   margin: 0;
-  font-size: 18.tab.active {
-  background: #4f46e5;
-  color: white;
+  font-size: 18px;
 }
 
 .gallery-modal-actions {
