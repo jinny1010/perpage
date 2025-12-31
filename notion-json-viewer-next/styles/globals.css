@@ -2432,7 +2432,7 @@ a, a:link, a:visited, a:hover, a:active {
   gap: 12px;
   overflow-y: auto;
   flex: 1;
-  max-height: calc(80vh - 120px); /* 이 줄 추가 */
+  grid-auto-rows: 1fr; /* 추가 */
 }
 
 .gallery-item {
@@ -2442,7 +2442,8 @@ a, a:link, a:visited, a:hover, a:active {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s;
-  width: 100%; /* 이 줄 추가 */
+  width: 100%; /* 추가 */
+  height: 100%; /* 추가 */
 }
 
 .gallery-item:hover {
@@ -2453,7 +2454,7 @@ a, a:link, a:visited, a:hover, a:active {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block; /* 이 줄 추가 */
+  position: relative; /* 추가 */
 }
 
 .gallery-favorite {
@@ -2501,7 +2502,6 @@ a, a:link, a:visited, a:hover, a:active {
     grid-template-columns: repeat(3, 1fr);  /* 모바일에서 3열 */
     gap: 8px;
     padding: 15px;
-    max-height: calc(80vh - 100px); /* 이 줄 추가 */
   }
   
   .collage-right .main-image img,
