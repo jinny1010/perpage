@@ -881,7 +881,10 @@ export default function FolderPage() {
                 {check19Gallery() && !show19Gallery && (
                   <button 
                     className="list-add-btn" 
-                    onClick={(e) => { e.stopPropagation(); setShowPasswordPrompt(true); }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setShowPasswordPrompt(true); 
+                    }}
                     style={{ background: '#dc2626' }}
                     title="19+ 갤러리 잠금 해제"
                   >
@@ -891,7 +894,11 @@ export default function FolderPage() {
                 {check19Gallery() && show19Gallery && (
                   <button 
                     className="list-add-btn" 
-                    onClick={(e) => { e.stopPropagation(); setShow19Gallery(false); loadGalleryImages(); }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      setShow19Gallery(false); 
+                      loadGalleryImages(); 
+                    }}
                     style={{ background: '#10b981' }}
                     title="19+ 갤러리 잠금"
                   >
@@ -903,35 +910,37 @@ export default function FolderPage() {
             </div>
             <div className="gallery-grid">
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
-              {!galleryLoading && galleryImages
-                .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
-                .map((img, i) => (
-                  <div key={i} className="gallery-item" onClick={() => { 
-                    setGalleryViewIndex((currentPage - 1) * ITEMS_PER_PAGE + i); 
-                    setShowGalleryViewer(true); 
-                  }}>
-                    <img src={img.url} alt={img.name} />
-                  </div>
-                ))}
+              {!galleryLoading && galleryImages.map((img, i) => (
+                <div key={i} className="gallery-item" onClick={() => { setGalleryViewIndex(i); setShowGalleryViewer(true); }}>
+                  <img src={img.url} alt={img.name} />
+                </div>
+              ))}
               {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
             </div>
-            {!galleryLoading && galleryImages.length > ITEMS_PER_PAGE && (
-              <div className="gallery-pagination">
-                <button 
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => p - 1)}
-                >
-                  ‹ 이전
-                </button>
-                <span>{currentPage} / {Math.ceil(galleryImages.length / ITEMS_PER_PAGE)}</span>
-                <button 
-                  disabled={currentPage >= Math.ceil(galleryImages.length / ITEMS_PER_PAGE)}
-                  onClick={() => setCurrentPage(p => p + 1)}
-                >
-                  다음 ›
-                </button>
-              </div>
-            )}
+          </div>
+        </div>
+      )}
+
+      {/* 19 갤러리 비밀번호 프롬프트 */}
+      {showPasswordPrompt && (
+        <div className="modal-overlay" onClick={() => setShowPasswordPrompt(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>🔒 19+ 갤러리 잠금 해제</h3>
+            <div className="form-group">
+              <label>비밀번호</label>
+              <input 
+                type="password" 
+                value={galleryPassword}
+                onChange={(e) => setGalleryPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                placeholder="비밀번호를 입력하세요"
+                autoFocus
+              />
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => { setShowPasswordPrompt(false); setGalleryPassword(''); }}>취소</button>
+              <button className="btn-submit" onClick={handlePasswordSubmit}>확인</button>
+            </div>
           </div>
         </div>
       )}
