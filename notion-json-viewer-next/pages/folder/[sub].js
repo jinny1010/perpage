@@ -267,6 +267,7 @@ export default function FolderPage() {
       setShowPasswordPrompt(false);
       setGalleryPassword('');
       showToast('갤러리 잠금 해제!', 'success');
+      loadGalleryImages(); // 이 줄 추가
     } else {
       showToast('비밀번호가 틀렸습니다', 'error');
       setGalleryPassword('');
@@ -352,11 +353,11 @@ export default function FolderPage() {
   };
 
   // 19 갤러리 잠금 해제 후 재로드
-  useEffect(() => {
-    if (show19Gallery && showGalleryModal) {
-      loadGalleryImages();
-    }
-  }, [show19Gallery]);
+useEffect(() => {
+  if (showGalleryModal) {
+    loadGalleryImages();
+  }
+}, [show19Gallery, showGalleryModal]);
 
   // 제목 수정
   const handleTitleEdit = () => {
