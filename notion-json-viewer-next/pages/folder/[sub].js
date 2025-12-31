@@ -51,7 +51,7 @@ export default function FolderPage() {
   const themeFileRef = useRef(null);
   const [customCss, setCustomCss] = useState('');
 
- // 갤러리 (ZIP 방식)
+  // 갤러리 (ZIP 방식)
   const [gallery, setGallery] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryLoading, setGalleryLoading] = useState(false);
@@ -250,10 +250,26 @@ export default function FolderPage() {
       const data = await res.json();
       if (res.ok) {
         setGallery(data.gallery || []);
-        setFavorites((data.gallery || []).filter(g => g.favorite));
       }
     } catch (err) {
       console.error('갤러리 로드 실패:', err);
+    }
+  };
+
+  const check19Gallery = () => {
+    const has19 = gallery.some(g => g.name?.includes('19') || g.sub?.includes('19'));
+    return has19;
+  };
+
+  const handlePasswordSubmit = () => {
+    if (galleryPassword === '0406') {
+      setShow19Gallery(true);
+      setShowPasswordPrompt(false);
+      setGalleryPassword('');
+      showToast('갤러리 잠금 해제!', 'success');
+    } else {
+      showToast('비밀번호가 틀렸습니다', 'error');
+      setGalleryPassword('');
     }
   };
 
@@ -269,11 +285,17 @@ export default function FolderPage() {
       const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
+      // 19 체크
+      const has19 = check19Gallery();
+      const filteredGallery = (has19 && !show19Gallery) 
+        ? gallery.filter(g => !g.name?.includes('19') && !g.sub?.includes('19'))
+        : gallery;
+      
       // ZIP 파일들
-      const zipItems = gallery.filter(g => g.isZip && g.fileUrl);
+      const zipItems = filteredGallery.filter(g => g.isZip && g.fileUrl);
       
       // 일반 이미지 파일들
-      const imageItems = gallery.filter(g => {
+      const imageItems = filteredGallery.filter(g => {
         if (!g.fileUrl || g.isZip) return false;
         const ext = g.fileName?.toLowerCase() || g.fileUrl.toLowerCase();
         return imageExtensions.some(e => ext.includes(e));
@@ -323,10 +345,18 @@ export default function FolderPage() {
   // 갤러리 모달 열 때 이미지 로드
   const openGallery = async () => {
     setShowGalleryModal(true);
+    setCurrentPage(1);
     if (galleryImages.length === 0) {
       await loadGalleryImages();
     }
   };
+
+  // 19 갤러리 잠금 해제 후 재로드
+  useEffect(() => {
+    if (show19Gallery && showGalleryModal) {
+      loadGalleryImages();
+    }
+  }, [show19Gallery]);
 
   // 제목 수정
   const handleTitleEdit = () => {
@@ -457,7 +487,7 @@ export default function FolderPage() {
     try {
       const formData = new FormData();
       formData.append('text', bookmarkModal.text);
-      formData.append('sourceTitle', sub); // 폴더 이름으로 저장
+      formData.append('sourceTitle', sub);
       formData.append('sub', sub);
       if (bookmarkImage) {
         formData.append('image', bookmarkImage);
@@ -561,22 +591,6 @@ export default function FolderPage() {
     });
     
     return `<p>${content}</p>`;
-    
-    // HTML이 있으면 이미지 스타일 보정 후 반환
-    // img 태그에 max-width 스타일이 없으면 추가
-    content = content.replace(/<img([^>]*)>/gi, (match, attrs) => {
-      if (!/max-width/i.test(attrs)) {
-        // style 속성이 있으면 거기에 추가, 없으면 새로 생성
-        if (/style\s*=/i.test(attrs)) {
-          return match.replace(/style\s*=\s*"([^"]*)"/i, 'style="$1; max-width: 100%; height: auto;"');
-        } else {
-          return `<img${attrs} style="max-width: 100%; height: auto;">`;
-        }
-      }
-      return match;
-    });
-    
-    return content;
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
@@ -604,7 +618,7 @@ export default function FolderPage() {
                   autoFocus
                   className="title-edit-input"
                 />
-                <button onClick={handleTitleSave} className="title-edit-btn">✓</button>
+                <button onClick={handleTitleSave} className="title-edit-btn">✔</button>
                 <button onClick={() => setEditingTitle(false)} className="title-edit-btn cancel">✕</button>
               </div>
             ) : (
@@ -665,14 +679,14 @@ export default function FolderPage() {
           
           {selectedText && (
             <button className="mobile-bookmark-btn" onClick={(e) => { e.stopPropagation(); setBookmarkModal(selectedText); }}>
-              🔖 책갈피 추가
+              📖 책갈피 추가
             </button>
           )}
         </div>
         {contextMenu && (
           <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
             {contextMenu.type === 'message' && <button onClick={() => { setDeleteTarget({ type: 'message', index: contextMenu.data.index }); setContextMenu(null); }}>🗑️ 삭제</button>}
-            {contextMenu.type === 'bookmark' && <button onClick={() => { setBookmarkModal(contextMenu.data); setContextMenu(null); }}>🔖 책갈피</button>}
+            {contextMenu.type === 'bookmark' && <button onClick={() => { setBookmarkModal(contextMenu.data); setContextMenu(null); }}>📖 책갈피</button>}
           </div>
         )}
         {deleteTarget?.type === 'message' && (
