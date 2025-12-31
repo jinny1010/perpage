@@ -11,27 +11,27 @@ body {
   color: rgb(27, 28, 30);
 }
 
-/* ë©”ì‹œì§€ ë‚´ DIV ë¸”ë¡ì˜ position: absolute ë¬¸ì œ í•´ê²° */
+/* 메시지 내 DIV 블록의 position: absolute 문제 해결 */
 .mes_text div[style*="position: absolute"],
 .sns-bubble div[style*="position: absolute"] {
   position: relative !important;
 }
 
-/* ë˜ëŠ” ë©”ì‹œì§€ ì»¨í…Œì´ë„ˆì— relative ì¶”ê°€ */
+/* 또는 메시지 컨테이너에 relative 추가 */
 .mes_text,
 .sns-bubble {
   position: relative;
   overflow: hidden;
 }
 
-/* ë©”ì‹œì§€ ë‚´ ëª¨ë“  divì— containment ì ìš© */
+/* 메시지 내 모든 div에 containment 적용 */
 .mes_text > div,
 .sns-bubble > div {
   position: relative !important;
   max-width: 100% !important;
 }
 
-/* ê²Œì‹œíŒ ë ˆì´ì•„ì›ƒ */
+/* 게시판 레이아웃 */
 .board-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -58,7 +58,7 @@ body {
   font-size: 14px;
 }
 
-/* í´ë” ì„¹ì…˜ */
+/* 폴더 섹션 */
 .folder-section {
   background: white;
   border-radius: 12px;
@@ -97,7 +97,7 @@ body {
   border-radius: 10px;
 }
 
-/* ê²Œì‹œê¸€ ëª©ë¡ */
+/* 게시글 목록 */
 .post-list {
   list-style: none;
 }
@@ -136,7 +136,7 @@ body {
   color: #999;
 }
 
-/* ì±„íŒ… ë·°ì–´ */
+/* 채팅 뷰어 */
 .viewer-container {
   max-width: 900px;
   margin: 0 auto;
@@ -196,7 +196,7 @@ body {
   background: #eee;
 }
 
-/* ë©”ì‹œì§€ ìŠ¤íƒ€ì¼ (standalone ê¸°ë°˜) */
+/* 메시지 스타일 (standalone 기반) */
 .mes {
   margin-bottom: 2px;
   background: white;
@@ -274,7 +274,7 @@ body {
   border-radius: 4px;
 }
 
-/* q íƒœê·¸ ê¸°ë³¸ ë”°ì˜´í‘œ ì œê±° */
+/* q 태그 기본 따옴표 제거 */
 .mes_text q::before,
 .mes_text q::after {
   content: none;
@@ -325,7 +325,7 @@ body {
   margin-bottom: 8px;
 }
 
-/* ë¡œë”© */
+/* 로딩 */
 .loading {
   display: flex;
   flex-direction: column;
@@ -349,7 +349,7 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ì—ëŸ¬ */
+/* 에러 */
 .error {
   background: #fef2f2;
   border: 1px solid #fecaca;
@@ -360,7 +360,7 @@ body {
   margin: 20px;
 }
 
-/* ë¹ˆ ìƒíƒœ */
+/* 빈 상태 */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -373,7 +373,7 @@ body {
   opacity: 0.5;
 }
 
-/* í”Œë¡œíŒ… ë©”ë‰´ */
+/* 플로팅 메뉴 */
 .floating-menu {
   position: fixed;
   bottom: 20px;
@@ -402,7 +402,7 @@ body {
   transform: scale(1.05);
 }
 
-/* ë°˜ì‘í˜• */
+/* 반응형 */
 @media (max-width: 768px) {
   .board-container, .viewer-container {
     padding: 12px;
@@ -418,7 +418,7 @@ body {
   }
 }
 
-/* ===== í…Œë§ˆ ì„ íƒ ë“œë¡­ë‹¤ìš´ ===== */
+/* ===== 테마 선택 드롭다운 ===== */
 .theme-select {
   padding: 8px 12px;
   border: 1px solid #ddd;
@@ -433,7 +433,7 @@ body {
   border-color: #4f46e5;
 }
 
-/* ===== í…Œë§ˆ 2: SNS ì±„íŒ… ìŠ¤íƒ€ì¼ ===== */
+/* ===== 테마 2: SNS 채팅 스타일 ===== */
 .theme-2 {
   display: flex;
   flex-direction: column;
@@ -520,7 +520,7 @@ body {
   border-radius: 4px;
 }
 
-/* q íƒœê·¸ ê¸°ë³¸ ë”°ì˜´í‘œ ì œê±° */
+/* q 태그 기본 따옴표 제거 */
 .sns-bubble q::before,
 .sns-bubble q::after {
   content: none;
@@ -567,7 +567,7 @@ body {
   color: #666;
 }
 
-/* ===== í”Œë¡œíŒ… ë²„íŠ¼ (ì—¬ëŸ¬ê°œ) ===== */
+/* ===== 플로팅 버튼 (여러개) ===== */
 .floating-menu {
   position: fixed;
   bottom: 20px;
@@ -614,7 +614,7 @@ body {
   font-size: 18px;
 }
 
-/* ===== ë“±ë¡ ëª¨ë‹¬ ===== */
+/* ===== 등록 모달 ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -730,7 +730,7 @@ body {
   cursor: not-allowed;
 }
 
-/* ===== ì»¨í…ìŠ¤íŠ¸ ë©”ë‰´ ===== */
+/* ===== 컨텍스트 메뉴 ===== */
 .context-menu {
   position: fixed;
   background: white;
@@ -760,7 +760,7 @@ body {
   background: rgba(79, 70, 229, 0.1);
 }
 
-/* ===== ì‚­ì œ ë²„íŠ¼ (ë¹¨ê°„ìƒ‰) ===== */
+/* ===== 삭제 버튼 (빨간색) ===== */
 .btn-danger {
   background: #dc2626 !important;
 }
@@ -769,7 +769,7 @@ body {
   background: #b91c1c !important;
 }
 
-/* ===== ì±…ê°ˆí”¼ ìŠ¤íƒ€ì¼ ===== */
+/* ===== 책갈피 스타일 ===== */
 .bookmarks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -813,7 +813,7 @@ body {
   margin-top: 12px;
 }
 
-/* ì±…ê°ˆí”¼ ëª¨ë‹¬ */
+/* 책갈피 모달 */
 .bookmark-modal {
   max-width: 500px;
 }
@@ -846,7 +846,7 @@ body {
   text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-/* ì±…ê°ˆí”¼ ë²„íŠ¼ */
+/* 책갈피 버튼 */
 .bookmark-view-btn {
   background: #f59e0b !important;
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
@@ -856,7 +856,7 @@ body {
   background: #d97706 !important;
 }
 
-/* ===== chat-messages ìŠ¤í¬ë¡¤ ===== */
+/* ===== chat-messages 스크롤 ===== */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -869,7 +869,7 @@ body {
   margin-top: 10px;
 }
 
-/* ìŠ¤í¬ë¡¤ë°” ì»¤ìŠ¤í…€ */
+/* 스크롤바 커스텀 */
 .chat-messages::-webkit-scrollbar {
   width: 8px;
 }
@@ -888,7 +888,7 @@ body {
   background: #a1a1a1;
 }
 
-/* í…Œë§ˆë³„ ìŠ¤í¬ë¡¤ë°” */
+/* 테마별 스크롤바 */
 .chat-messages.theme-1::-webkit-scrollbar-thumb {
   background: #d4a574;
 }
@@ -897,7 +897,7 @@ body {
   background: #6b8e9f;
 }
 
-/* ===== ë°˜ì‘í˜• ì¶”ê°€ ===== */
+/* ===== 반응형 추가 ===== */
 @media (max-width: 768px) {
   .context-menu {
     min-width: 120px;
@@ -912,7 +912,7 @@ body {
   }
 }
 
-/* ===== íŒŒì¼ ì—…ë¡œë“œ ë“œë¡­ ì˜ì—­ ===== */
+/* ===== 파일 업로드 드롭 영역 ===== */
 .file-drop {
   border: 2px dashed #ddd;
   border-radius: 10px;
@@ -929,7 +929,7 @@ body {
   background: rgba(79, 70, 229, 0.05);
 }
 
-/* ===== í† ìŠ¤íŠ¸ ì•ŒëŸ¿ ===== */
+/* ===== 토스트 알럿 ===== */
 .toast-container {
   position: fixed;
   top: 20px;
@@ -1033,7 +1033,7 @@ body {
   background: #6366f1;
 }
 
-/* ===== ë©”ì¸ íŽ˜ì´ì§€ ===== */
+/* ===== 메인 페이지 ===== */
 .main-container {
   max-width: 800px;
   margin: 0 auto;
@@ -1091,7 +1091,7 @@ body {
   color: #999;
 }
 
-/* ===== í´ë” íŽ˜ì´ì§€ ===== */
+/* ===== 폴더 페이지 ===== */
 .folder-page-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -1122,7 +1122,7 @@ body {
   background: #f5f5f5;
 }
 
-/* ===== íƒ­ ===== */
+/* ===== 탭 ===== */
 .tabs {
   display: flex;
   gap: 8px;
@@ -1155,7 +1155,7 @@ body {
   color: white;
 }
 
-/* ===== ì´ë¯¸ì§€ ë·°ì–´ (ì „ì²´í™”ë©´) ===== */
+/* ===== 이미지 뷰어 (전체화면) ===== */
 .image-viewer-overlay {
   position: fixed;
   inset: 0;
@@ -1230,7 +1230,7 @@ body {
   margin-top: 20px;
 }
 
-/* ===== ë°˜ì‘í˜• ì¶”ê°€ ===== */
+/* ===== 반응형 추가 ===== */
 @media (max-width: 768px) {
   .folder-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1254,7 +1254,7 @@ body {
   }
 }
 
-/* ===== ë©”ì¸ ìŠ¤í¬ë¡¤ íŽ˜ì´ì§€ ===== */
+/* ===== 메인 스크롤 페이지 ===== */
 .main-scroll-container {
   height: 100vh;
   background: #0a0a0a;
@@ -1371,7 +1371,7 @@ a, a:link, a:visited, a:hover, a:active {
   text-orientation: mixed;
 }
 
-/* ===== ì´ë¯¸ì§€ ë·°ì–´ ===== */
+/* ===== 이미지 뷰어 ===== */
 .image-viewer-overlay {
   position: fixed;
   inset: 0;
@@ -1445,7 +1445,7 @@ a, a:link, a:visited, a:hover, a:active {
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
 }
 
-/* ë°˜ì‘í˜• */
+/* 반응형 */
 @media (max-width: 768px) {
   .main-side-title {
     position: relative;
@@ -1485,7 +1485,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ë°˜ì‘í˜• */
+/* 반응형 */
 @media (max-width: 768px) {
   .carousel-header h1 {
     font-size: 32px;
@@ -1505,7 +1505,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ===== í´ë” ëŒ€ì‹œë³´ë“œ ===== */
+/* ===== 폴더 대시보드 ===== */
 .folder-dashboard {
   min-height: 100vh;
   position: relative;
@@ -1526,7 +1526,7 @@ a, a:link, a:visited, a:hover, a:active {
   z-index: 10;
 }
 
-/* ì™¼ìª½ ìƒë‹¨: ë©”ì¸ ì´ë¯¸ì§€ (ì±…ê°ˆí”¼ ìµœì‹ ) */
+/* 왼쪽 상단: 메인 이미지 (책갈피 최신) */
 .dashboard-main-image {
   position: absolute;
   top: 30px;
@@ -1538,7 +1538,7 @@ a, a:link, a:visited, a:hover, a:active {
   border: 4px solid;
 }
 
-/* ì™¼ìª½ í•˜ë‹¨: ì‹œê³„ */
+/* 왼쪽 하단: 시계 */
 .dashboard-clock {
   position: absolute;
   left: 50px;
@@ -1551,7 +1551,7 @@ a, a:link, a:visited, a:hover, a:active {
   letter-spacing: 1px;
 }
 
-/* ì™¼ìª½ í•˜ë‹¨: ë²ˆí˜¸ */
+/* 왼쪽 하단: 번호 */
 .dashboard-number {
   position: absolute;
   left: 50px;
@@ -1562,7 +1562,7 @@ a, a:link, a:visited, a:hover, a:active {
   line-height: 0.8;
 }
 
-/* ë²ˆí˜¸ ì˜† ìž¥ì‹ - í•˜íŠ¸ + ëž¨í”„ */
+/* 번호 옆 장식 - 하트 + 램프 */
 .dashboard-deco {
   position: absolute;
   left: 200px;
@@ -1583,7 +1583,7 @@ a, a:link, a:visited, a:hover, a:active {
   font-size: 24px;
 }
 
-/* ì¤‘ì•™: ìŒì•… í”Œë ˆì´ì–´ */
+/* 중앙: 음악 플레이어 */
 .dashboard-player {
   position: absolute;
   top: 320px;
@@ -1635,7 +1635,7 @@ a, a:link, a:visited, a:hover, a:active {
   padding: 5px 15px;
 }
 
-/* ì˜¤ë¥¸ìª½: ë©”ë‰´ ì´ë¯¸ì§€ë“¤ */
+/* 오른쪽: 메뉴 이미지들 */
 .dashboard-menu {
   position: absolute;
   right: 50px;
@@ -1654,7 +1654,7 @@ a, a:link, a:visited, a:hover, a:active {
   filter: grayscale(70%) contrast(1.1);
 }
 
-/* ì˜¤ë¥¸ìª½ ìƒë‹¨: ì±…ê°ˆí”¼ í…ìŠ¤íŠ¸ */
+/* 오른쪽 상단: 책갈피 텍스트 */
 .dashboard-quote {
   position: absolute;
   top: 40px;
@@ -1666,7 +1666,7 @@ a, a:link, a:visited, a:hover, a:active {
   text-align: right;
 }
 
-/* ì˜¤ë¥¸ìª½ í•˜ë‹¨: íƒ­ ë²„íŠ¼ */
+/* 오른쪽 하단: 탭 버튼 */
 .dashboard-tabs {
   position: absolute;
   bottom: 40px;
@@ -1691,7 +1691,7 @@ a, a:link, a:visited, a:hover, a:active {
   transform: translateY(-2px);
 }
 
-/* ëª©ë¡/ì±…ê°ˆí”¼ ëª¨ë‹¬ */
+/* 목록/책갈피 모달 */
 .list-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1801,7 +1801,7 @@ a, a:link, a:visited, a:hover, a:active {
   padding: 40px;
 }
 
-/* ë°˜ì‘í˜• */
+/* 반응형 */
 @media (max-width: 1024px) {
   .dashboard-main-image {
     left: 50px;
@@ -1889,7 +1889,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ë©”ì¸ í´ë” ì¶”ê°€ ë²„íŠ¼ */
+/* 메인 폴더 추가 버튼 */
 .add-folder-btn {
   position: fixed;
   bottom: 30px;
@@ -1911,7 +1911,7 @@ a, a:link, a:visited, a:hover, a:active {
   transform: scale(1.1);
 }
 
-/* ë·°ì–´ í—¤ë” íŽ˜ì´ë“œì•„ì›ƒ */
+/* 뷰어 헤더 페이드아웃 */
 .viewer-header {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -1922,7 +1922,7 @@ a, a:link, a:visited, a:hover, a:active {
   pointer-events: none;
 }
 
-/* ëª©ë¡ ëª¨ë‹¬ í—¤ë” */
+/* 목록 모달 헤더 */
 .list-modal-header {
   display: flex;
   justify-content: space-between;
@@ -1949,7 +1949,7 @@ a, a:link, a:visited, a:hover, a:active {
   transform: scale(1.1);
 }
 
-/* ì„ íƒëœ í…ìŠ¤íŠ¸ í”Œë¡œíŒ… ë²„íŠ¼ (ëª¨ë°”ì¼ìš©) */
+/* 선택된 텍스트 플로팅 버튼 (모바일용) */
 .floating-bookmark-btn {
   position: fixed;
   bottom: 30px;
@@ -1983,7 +1983,7 @@ a, a:link, a:visited, a:hover, a:active {
   transform: translateX(-50%) scale(0.95);
 }
 
-/* ë·°ì–´ í—¤ë” íŽ˜ì´ë“œì•„ì›ƒ */
+/* 뷰어 헤더 페이드아웃 */
 .viewer-header {
   transition: opacity 0.3s, transform 0.3s;
 }
@@ -1994,7 +1994,7 @@ a, a:link, a:visited, a:hover, a:active {
   pointer-events: none;
 }
 
-/* ëª©ë¡ ëª¨ë‹¬ í—¤ë” */
+/* 목록 모달 헤더 */
 .list-modal-header {
   display: flex;
   justify-content: space-between;
@@ -2040,7 +2040,7 @@ a, a:link, a:visited, a:hover, a:active {
   line-height: 1;
 }
 
-/* ëª¨ë°”ì¼ ì±…ê°ˆí”¼ ë²„íŠ¼ */
+/* 모바일 책갈피 버튼 */
 .mobile-bookmark-btn {
   position: fixed;
   bottom: 30px;
@@ -2070,7 +2070,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ëª¨ë°”ì¼ ë°˜ì‘í˜• ì´ë¯¸ì§€ ë·°ì–´ */
+/* 모바일 반응형 이미지 뷰어 */
 @media (max-width: 768px) {
   .image-viewer-card {
     max-width: 90vw;
@@ -2086,7 +2086,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ===== í´ë” ëŒ€ì‹œë³´ë“œ V2 ===== */
+/* ===== 폴더 대시보드 V2 ===== */
 .folder-dashboard-v2 {
   max-width: 900px;
   margin: 0 auto;
@@ -2217,14 +2217,14 @@ a, a:link, a:visited, a:hover, a:active {
   font-size: 80px;
 }
 
-/* ê¸´ ì´ë¦„ìš© ìž‘ì€ í°íŠ¸ */
+/* 긴 이름용 작은 폰트 */
 .big-name-display .name-first.small,
 .big-name-display .name-last.small,
 .big-name-display .name-single.small {
   font-size: 60px;
 }
 
-/* ëª¨ë°”ì¼ ì´ë¦„ ë ˆì´ì•„ì›ƒ */
+/* 모바일 이름 레이아웃 */
 @media (max-width: 768px) {
   .big-name-display {
     width: 100%;
@@ -2251,7 +2251,7 @@ a, a:link, a:visited, a:hover, a:active {
     font-size: 80px;
   }
   
-  /* ëª¨ë°”ì¼ ê¸´ ì´ë¦„ìš© */
+  /* 모바일 긴 이름용 */
   .big-name-display .name-first.small,
   .big-name-display .name-last.small,
   .big-name-display .name-single.small {
@@ -2281,7 +2281,7 @@ a, a:link, a:visited, a:hover, a:active {
   filter: grayscale(1);
 }
 
-/* ë°˜ì‘í˜• */
+/* 반응형 */
 @media (max-width: 768px) {
   .folder-dashboard-v2 {
     padding: 20px 15px;
@@ -2315,7 +2315,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ===== ê°¤ëŸ¬ë¦¬ ìŠ¬ë¼ì´ë“œ ===== */
+/* ===== 갤러리 슬라이드 ===== */
 .gallery-slide-wrapper {
   border: 3px solid;
   padding: 5px;
@@ -2357,7 +2357,7 @@ a, a:link, a:visited, a:hover, a:active {
   opacity: 0.7;
 }
 
-/* ê°¤ëŸ¬ë¦¬ ëª¨ë‹¬ */
+/* 갤러리 모달 */
 .gallery-modal {
   background: white;
   border-radius: 12px;
@@ -2433,7 +2433,7 @@ a, a:link, a:visited, a:hover, a:active {
   transform: scale(1.1);
 }
 
-/* ìš°ì¸¡ ì´ë¯¸ì§€ ì¡°ì • */
+/* 우측 이미지 조정 */
 .collage-right .main-image img {
   height: 250px;
   object-fit: cover;
@@ -2444,7 +2444,7 @@ a, a:link, a:visited, a:hover, a:active {
   object-fit: cover;
 }
 
-/* ëª¨ë°”ì¼ ê°¤ëŸ¬ë¦¬ */
+/* 모바일 갤러리 */
 @media (max-width: 768px) {
   .gallery-slide-img,
   .gallery-empty {
@@ -2461,7 +2461,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ê°¤ëŸ¬ë¦¬ ë¡œë”© */
+/* 갤러리 로딩 */
 .loading-text {
   text-align: center;
   padding: 40px;
@@ -2469,7 +2469,7 @@ a, a:link, a:visited, a:hover, a:active {
   grid-column: 1 / -1;
 }
 
-/* ì œëª© ìˆ˜ì • */
+/* 제목 수정 */
 .title-edit-wrapper {
   display: flex;
   align-items: center;
@@ -2505,7 +2505,7 @@ a, a:link, a:visited, a:hover, a:active {
   background: #f44336;
 }
 
-/* ê°¤ëŸ¬ë¦¬ ìŠ¬ë¼ì´ë“œ ë·°ì–´ */
+/* 갤러리 슬라이드 뷰어 */
 .gallery-viewer-overlay {
   position: fixed;
   top: 0;
@@ -2581,7 +2581,7 @@ a, a:link, a:visited, a:hover, a:active {
   cursor: pointer;
 }
 
-/* ëª¨ë°”ì¼ ê°¤ëŸ¬ë¦¬ ë·°ì–´ */
+/* 모바일 갤러리 뷰어 */
 @media (max-width: 768px) {
   .gallery-nav {
     width: 40px;
@@ -2607,7 +2607,7 @@ a, a:link, a:visited, a:hover, a:active {
   }
 }
 
-/* ì±…ê°ˆí”¼ ì´ë¯¸ì§€ ì˜µì…˜ */
+/* 책갈피 이미지 옵션 */
 .bookmark-image-options {
   display: flex;
   flex-direction: column;
@@ -2628,7 +2628,7 @@ a, a:link, a:visited, a:hover, a:active {
   background: #e0e0e0;
 }
 
-/* ê°¤ëŸ¬ë¦¬ ì„ íƒ ëª¨ë‹¬ */
+/* 갤러리 선택 모달 */
 .gallery-picker-overlay {
   position: fixed;
   top: 0;
