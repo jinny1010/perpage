@@ -871,7 +871,7 @@ export default function FolderPage() {
         </div>
       </div>
 
-      {/* 갤러리 모달 */}
+    {/* 갤러리 모달 */}
       {showGalleryModal && (
         <div className="modal-overlay" onClick={() => setShowGalleryModal(false)}>
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
@@ -903,13 +903,35 @@ export default function FolderPage() {
             </div>
             <div className="gallery-grid">
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
-              {!galleryLoading && galleryImages.map((img, i) => (
-                <div key={i} className="gallery-item" onClick={() => { setGalleryViewIndex(i); setShowGalleryViewer(true); }}>
-                  <img src={img.url} alt={img.name} />
-                </div>
-              ))}
+              {!galleryLoading && galleryImages
+                .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                .map((img, i) => (
+                  <div key={i} className="gallery-item" onClick={() => { 
+                    setGalleryViewIndex((currentPage - 1) * ITEMS_PER_PAGE + i); 
+                    setShowGalleryViewer(true); 
+                  }}>
+                    <img src={img.url} alt={img.name} />
+                  </div>
+                ))}
               {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
             </div>
+            {!galleryLoading && galleryImages.length > ITEMS_PER_PAGE && (
+              <div className="gallery-pagination">
+                <button 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                >
+                  ‹ 이전
+                </button>
+                <span>{currentPage} / {Math.ceil(galleryImages.length / ITEMS_PER_PAGE)}</span>
+                <button 
+                  disabled={currentPage >= Math.ceil(galleryImages.length / ITEMS_PER_PAGE)}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                >
+                  다음 ›
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
