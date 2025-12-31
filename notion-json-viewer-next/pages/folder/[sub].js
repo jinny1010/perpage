@@ -35,14 +35,14 @@ export default function FolderPage() {
   const viewerRef = useRef(null);
   const longPressTimer = useRef(null);
   
-  // í—¤ë” í‘œì‹œ ìƒíƒœ
+  // 헤더 표시 상태
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollTop = useRef(0);
   
-  // ëª¨ë°”ì¼ ì„ íƒ í…ìŠ¤íŠ¸ ë²„íŠ¼
+  // 모바일 선택 텍스트 버튼
   const [selectedText, setSelectedText] = useState(null);
   
-  // ì»¤ìŠ¤í…€ í…Œë§ˆ
+  // 커스텀 테마
   const [customThemes, setCustomThemes] = useState([]);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [newThemeName, setNewThemeName] = useState('');
@@ -51,7 +51,7 @@ export default function FolderPage() {
   const themeFileRef = useRef(null);
   const [customCss, setCustomCss] = useState('');
 
-  // ê°¤ëŸ¬ë¦¬ (ZIP ë°©ì‹)
+  // 갤러리 (ZIP 방식)
   const [gallery, setGallery] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryLoading, setGalleryLoading] = useState(false);
@@ -60,11 +60,11 @@ export default function FolderPage() {
   const [galleryViewIndex, setGalleryViewIndex] = useState(0);
   const [showGalleryViewer, setShowGalleryViewer] = useState(false);
   
-  // ì±…ê°ˆí”¼ìš© ê°¤ëŸ¬ë¦¬ ì„ íƒ
+  // 책갈피용 갤러리 선택
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
   const [bookmarkImageUrl, setBookmarkImageUrl] = useState(null);
 
-  // ì œëª© ìˆ˜ì •
+  // 제목 수정
   const [editingTitle, setEditingTitle] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const titleLongPressTimer = useRef(null);
@@ -92,7 +92,7 @@ export default function FolderPage() {
     }
   }, [sub]);
 
-  // ì»¤ìŠ¤í…€ í…Œë§ˆ CSS ì ìš©
+  // 커스텀 테마 CSS 적용
   useEffect(() => {
     if (theme > 2 && customThemes.length > 0) {
       const selectedTheme = customThemes.find((t, i) => i + 3 === theme);
@@ -100,7 +100,7 @@ export default function FolderPage() {
         fetch(selectedTheme.cssUrl)
           .then(res => res.text())
           .then(css => setCustomCss(css))
-          .catch(err => console.error('CSS ë¡œë“œ ì‹¤íŒ¨:', err));
+          .catch(err => console.error('CSS 로드 실패:', err));
       }
     } else {
       setCustomCss('');
@@ -205,13 +205,13 @@ export default function FolderPage() {
         setCustomThemes(data.themes || []);
       }
     } catch (err) {
-      console.error('í…Œë§ˆ ë¡œë“œ ì‹¤íŒ¨:', err);
+      console.error('테마 로드 실패:', err);
     }
   };
 
   const handleAddTheme = async () => {
     if (!newThemeName.trim() || !newThemeCss) {
-      showToast('í…Œë§ˆ ì´ë¦„ê³¼ CSS íŒŒì¼ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”', 'error');
+      showToast('테마 이름과 CSS 파일을 입력해주세요', 'error');
       return;
     }
     setAddingTheme(true);
@@ -225,13 +225,13 @@ export default function FolderPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      showToast('í…Œë§ˆ ì¶”ê°€ ì™„ë£Œ!', 'success');
+      showToast('테마 추가 완료!', 'success');
       setShowThemeModal(false);
       setNewThemeName('');
       setNewThemeCss(null);
       fetchThemes();
     } catch (err) {
-      showToast('í…Œë§ˆ ì¶”ê°€ ì‹¤íŒ¨: ' + err.message, 'error');
+      showToast('테마 추가 실패: ' + err.message, 'error');
     } finally {
       setAddingTheme(false);
     }
@@ -246,11 +246,11 @@ export default function FolderPage() {
         setFavorites((data.gallery || []).filter(g => g.favorite));
       }
     } catch (err) {
-      console.error('ê°¤ëŸ¬ë¦¬ ë¡œë“œ ì‹¤íŒ¨:', err);
+      console.error('갤러리 로드 실패:', err);
     }
   };
 
-  // ëª¨ë“  ZIP íŒŒì¼ + ì¼ë°˜ ì´ë¯¸ì§€ì—ì„œ ì¶”ì¶œ
+  // 모든 ZIP 파일 + 일반 이미지에서 추출
   const loadGalleryImages = async () => {
     if (gallery.length === 0) {
       setGalleryImages([]);
@@ -262,22 +262,22 @@ export default function FolderPage() {
       const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
-      // ZIP íŒŒì¼ë“¤
+      // ZIP 파일들
       const zipItems = gallery.filter(g => g.isZip && g.fileUrl);
       
-      // ì¼ë°˜ ì´ë¯¸ì§€ íŒŒì¼ë“¤
+      // 일반 이미지 파일들
       const imageItems = gallery.filter(g => {
         if (!g.fileUrl || g.isZip) return false;
         const ext = g.fileName?.toLowerCase() || g.fileUrl.toLowerCase();
         return imageExtensions.some(e => ext.includes(e));
       });
 
-      // ì¼ë°˜ ì´ë¯¸ì§€ ì¶”ê°€
+      // 일반 이미지 추가
       for (const img of imageItems) {
         allImages.push({ name: img.name || img.fileName, url: img.fileUrl });
       }
 
-      // ZIP íŒŒì¼ ì²˜ë¦¬
+      // ZIP 파일 처리
       if (zipItems.length > 0) {
         const JSZip = (await import('jszip')).default;
         
@@ -297,23 +297,23 @@ export default function FolderPage() {
               }
             }
           } catch (err) {
-            console.error(`ZIP ë¡œë“œ ì‹¤íŒ¨ (${zipItem.name}):`, err);
+            console.error(`ZIP 로드 실패 (${zipItem.name}):`, err);
           }
         }
       }
       
-      // íŒŒì¼ëª… ì •ë ¬
+      // 파일명 정렬
       allImages.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       setGalleryImages(allImages);
     } catch (err) {
-      console.error('ê°¤ëŸ¬ë¦¬ ë¡œë“œ ì‹¤íŒ¨:', err);
-      showToast('ê°¤ëŸ¬ë¦¬ ë¡œë“œ ì‹¤íŒ¨', 'error');
+      console.error('갤러리 로드 실패:', err);
+      showToast('갤러리 로드 실패', 'error');
     } finally {
       setGalleryLoading(false);
     }
   };
 
-  // ê°¤ëŸ¬ë¦¬ ëª¨ë‹¬ ì—´ ë•Œ ì´ë¯¸ì§€ ë¡œë“œ
+  // 갤러리 모달 열 때 이미지 로드
   const openGallery = async () => {
     setShowGalleryModal(true);
     if (galleryImages.length === 0) {
@@ -321,7 +321,7 @@ export default function FolderPage() {
     }
   };
 
-  // ì œëª© ìˆ˜ì •
+  // 제목 수정
   const handleTitleEdit = () => {
     setNewTitle(selectedPost.title);
     setEditingTitle(true);
@@ -329,7 +329,7 @@ export default function FolderPage() {
 
   const handleTitleSave = async () => {
     if (!newTitle.trim()) {
-      showToast('ì œëª©ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”', 'error');
+      showToast('제목을 입력해주세요', 'error');
       return;
     }
     try {
@@ -338,14 +338,14 @@ export default function FolderPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pageId: selectedPost.id, title: newTitle })
       });
-      if (!res.ok) throw new Error('ìˆ˜ì • ì‹¤íŒ¨');
+      if (!res.ok) throw new Error('수정 실패');
       
       setSelectedPost({ ...selectedPost, title: newTitle });
       setPosts(posts.map(p => p.id === selectedPost.id ? { ...p, title: newTitle } : p));
       setEditingTitle(false);
-      showToast('ì œëª© ìˆ˜ì • ì™„ë£Œ!', 'success');
+      showToast('제목 수정 완료!', 'success');
     } catch (err) {
-      showToast('ì œëª© ìˆ˜ì • ì‹¤íŒ¨', 'error');
+      showToast('제목 수정 실패', 'error');
     }
   };
 
@@ -387,7 +387,7 @@ export default function FolderPage() {
 
   const handleUpload = async () => {
     if (!uploadData.title) {
-      showToast('ì œëª©ì„ ìž…ë ¥í•´ì£¼ì„¸ìš”', 'error');
+      showToast('제목을 입력해주세요', 'error');
       return;
     }
     setUploading(true);
@@ -399,13 +399,13 @@ export default function FolderPage() {
       const res = await fetch('/api/create', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      showToast('ë“±ë¡ ì™„ë£Œ!', 'success');
+      showToast('등록 완료!', 'success');
       setShowModal(false);
       setUploadData({ title: '' });
       setUploadFile(null);
       fetchPosts();
     } catch (err) {
-      showToast('ë“±ë¡ ì‹¤íŒ¨: ' + err.message, 'error');
+      showToast('등록 실패: ' + err.message, 'error');
     } finally {
       setUploading(false);
     }
@@ -417,11 +417,11 @@ export default function FolderPage() {
       const res = await fetch(`/api/delete?pageId=${deleteTarget.id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      showToast('ì‚­ì œ ì™„ë£Œ!', 'success');
+      showToast('삭제 완료!', 'success');
       setDeleteTarget(null);
       fetchPosts();
     } catch (err) {
-      showToast('ì‚­ì œ ì‹¤íŒ¨: ' + err.message, 'error');
+      showToast('삭제 실패: ' + err.message, 'error');
     }
   };
 
@@ -438,9 +438,9 @@ export default function FolderPage() {
       updated.splice(index, 1);
       setMessages(updated);
       setDeleteTarget(null);
-      showToast('ë©”ì‹œì§€ ì‚­ì œë¨', 'success');
+      showToast('메시지 삭제됨', 'success');
     } catch (err) {
-      showToast('ì‚­ì œ ì‹¤íŒ¨: ' + err.message, 'error');
+      showToast('삭제 실패: ' + err.message, 'error');
     }
   };
 
@@ -450,7 +450,7 @@ export default function FolderPage() {
     try {
       const formData = new FormData();
       formData.append('text', bookmarkModal.text);
-      formData.append('sourceTitle', sub); // í´ë” ì´ë¦„ìœ¼ë¡œ ì €ìž¥
+      formData.append('sourceTitle', sub); // 폴더 이름으로 저장
       formData.append('sub', sub);
       if (bookmarkImage) {
         formData.append('image', bookmarkImage);
@@ -460,14 +460,14 @@ export default function FolderPage() {
       const res = await fetch('/api/bookmark', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      showToast('ì±…ê°ˆí”¼ ì €ìž¥!', 'success');
+      showToast('책갈피 저장!', 'success');
       setBookmarkModal(null);
       setBookmarkImage(null);
       setBookmarkImageUrl(null);
       setSelectedText(null);
       fetchBookmarks();
     } catch (err) {
-      showToast('ì €ìž¥ ì‹¤íŒ¨: ' + err.message, 'error');
+      showToast('저장 실패: ' + err.message, 'error');
     } finally {
       setBookmarkSaving(false);
     }
@@ -486,40 +486,40 @@ export default function FolderPage() {
   const formatMessage = (content) => {
     if (!content) return '';
     
-    // OOC ì²˜ë¦¬
+    // OOC 처리
     content = content.replace(/\(??[Oo][Oo][Cc]\s*:[\s\S]*$/gm, (m) => `<details><summary>OOC</summary>${m}</details>`);
     
-    // Updated Timeline ì²˜ë¦¬
+    // Updated Timeline 처리
     content = content.replace(/### \*\*Updated Timeline\*\*[\s\S]*$/gm, (m) => `<details><summary>Updated Timeline</summary>${m}</details>`);
     
-    // ### ë¡œ ì‹œìž‘í•˜ëŠ” OOC ìˆ¨ê¹€
+    // ### 로 시작하는 OOC 숨김
     content = content.replace(/^###.*[\s\S]*$/gm, (m) => `<details><summary>OOC Hidden</summary>${m}</details>`);
     
-    // thought/cot/thinking íƒœê·¸ ì œê±°
+    // thought/cot/thinking 태그 제거
     content = content.replace(/(?:```?\w*[\r\n]?)?<(thought|cot|thinking|CoT|think|starter)([\s\S]*?)<\/(thought|cot|thinking|CoT|think|starter)>(?:[\r\n]?```?)?/g, '');
     
-    // imageinfo íƒœê·¸ ì œê±°
+    // imageinfo 태그 제거
     content = content.replace(/<[Ii][Mm][Aa][Gg][Ee][Ii][Nn][Ff][Oo]>[\s\S]*?<\/[Ii][Mm][Aa][Gg][Ee][Ii][Nn][Ff][Oo]>/g, '');
     
-    // pic íƒœê·¸ ì œê±° (ë‹¤ì–‘í•œ í˜•íƒœ)
+    // pic 태그 제거 (다양한 형태)
     content = content.replace(/<\/pic>/g, '');
     content = content.replace(/<pic\s+prompt="[^"]*"\s*\/?>[\s\S]*?(?:<\/pic>)?/g, '');
     content = content.replace(/<pic>[\s\S]*?<\/pic>/g, '');
     content = content.replace(/<pic\s+prompt="[^"]*"\s*\/?>\s*[^<]*/g, '');
     
-    // infoblock ì œê±°
+    // infoblock 제거
     content = content.replace(/<infoblock>[\s\S]*?<\/infoblock>/g, '');
     
-    // ðŸ¥¨ Sex Position ì œê±°
-    content = content.replace(/ðŸ¥¨ Sex Position[\s\S]*?(?=```|$)/g, '');
+    // 🥨 Sex Position 제거
+    content = content.replace(/🥨 Sex Position[\s\S]*?(?=```|$)/g, '');
     
-    // HTML ë¸”ë¡(div) ì¶”ì¶œ í›„ ë§ˆí¬ë‹¤ìš´ ì²˜ë¦¬
+    // HTML 블록(div) 추출 후 마크다운 처리
     const htmlBlocks = [];
     content = content.replace(/<div[\s\S]*?<\/div>/gi, (match) => {
       const placeholder = `__HTML_BLOCK_${htmlBlocks.length}__`;
-      // position: absoluteë¥¼ relativeë¡œ ë³€ê²½
+      // position: absolute를 relative로 변경
       let fixed = match.replace(/position:\s*absolute/gi, 'position: relative');
-      // imgì— max-width ì¶”ê°€
+      // img에 max-width 추가
       fixed = fixed.replace(/<img([^>]*)>/gi, (m, attrs) => {
         if (!/max-width/i.test(attrs)) {
           if (/style\s*=/i.test(attrs)) {
@@ -534,32 +534,32 @@ export default function FolderPage() {
       return placeholder;
     });
     
-    // ë§ˆí¬ë‹¤ìš´ ì²˜ë¦¬ (DIV ì œì™¸í•œ í…ìŠ¤íŠ¸)
-    // **ë³¼ë“œ** ì²˜ë¦¬
+    // 마크다운 처리 (DIV 제외한 텍스트)
+    // **볼드** 처리
     content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     
-    // *ì´íƒ¤ë¦­* ì²˜ë¦¬
+    // *이탤릭* 처리
     content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     
-    // "ë”°ì˜´í‘œ" ì²˜ë¦¬
+    // "따옴표" 처리
     content = content.replace(/"([^"]+)"/g, '<span class="dialogue">"$1"</span>');
     
-    // ì¤„ë°”ê¿ˆ ì²˜ë¦¬
+    // 줄바꿈 처리
     content = content.replace(/\n\n+/g, '</p><p>');
     content = content.replace(/\n/g, '<br>');
     
-    // HTML ë¸”ë¡ ë³µì›
+    // HTML 블록 복원
     htmlBlocks.forEach((block, i) => {
       content = content.replace(`__HTML_BLOCK_${i}__`, block);
     });
     
     return `<p>${content}</p>`;
     
-    // HTMLì´ ìžˆìœ¼ë©´ ì´ë¯¸ì§€ ìŠ¤íƒ€ì¼ ë³´ì • í›„ ë°˜í™˜
-    // img íƒœê·¸ì— max-width ìŠ¤íƒ€ì¼ì´ ì—†ìœ¼ë©´ ì¶”ê°€
+    // HTML이 있으면 이미지 스타일 보정 후 반환
+    // img 태그에 max-width 스타일이 없으면 추가
     content = content.replace(/<img([^>]*)>/gi, (match, attrs) => {
       if (!/max-width/i.test(attrs)) {
-        // style ì†ì„±ì´ ìžˆìœ¼ë©´ ê±°ê¸°ì— ì¶”ê°€, ì—†ìœ¼ë©´ ìƒˆë¡œ ìƒì„±
+        // style 속성이 있으면 거기에 추가, 없으면 새로 생성
         if (/style\s*=/i.test(attrs)) {
           return match.replace(/style\s*=\s*"([^"]*)"/i, 'style="$1; max-width: 100%; height: auto;"');
         } else {
@@ -579,7 +579,7 @@ export default function FolderPage() {
   const themeColor = folderInfo?.color || '#8B0000';
   const latestBookmarkImage = bookmarks[0]?.imageUrl;
 
-  // ë·°ì–´
+  // 뷰어
   if (selectedPost) {
     return (
       <>
@@ -597,8 +597,8 @@ export default function FolderPage() {
                   autoFocus
                   className="title-edit-input"
                 />
-                <button onClick={handleTitleSave} className="title-edit-btn">âœ“</button>
-                <button onClick={() => setEditingTitle(false)} className="title-edit-btn cancel">âœ•</button>
+                <button onClick={handleTitleSave} className="title-edit-btn">✓</button>
+                <button onClick={() => setEditingTitle(false)} className="title-edit-btn cancel">✕</button>
               </div>
             ) : (
               <h2 
@@ -615,14 +615,14 @@ export default function FolderPage() {
             )}
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <select value={theme} onChange={(e) => setTheme(Number(e.target.value))} className="theme-select">
-                <option value={1}>í…Œë§ˆ 1</option>
-                <option value={2}>í…Œë§ˆ 2</option>
+                <option value={1}>테마 1</option>
+                <option value={2}>테마 2</option>
                 {customThemes.map((t, i) => (
                   <option key={t.id} value={i + 3}>{t.name}</option>
                 ))}
               </select>
               <button className="btn-add-theme" onClick={() => setShowThemeModal(true)}>+</button>
-              <button className="btn-back" onClick={() => { closeViewer(); setActiveTab('posts'); }}>â† ëª©ë¡</button>
+              <button className="btn-back" onClick={() => { closeViewer(); setActiveTab('posts'); }}>← 목록</button>
             </div>
           </div>
           {viewerLoading && <div className="loading"><div className="spinner"></div></div>}
@@ -658,23 +658,23 @@ export default function FolderPage() {
           
           {selectedText && (
             <button className="mobile-bookmark-btn" onClick={(e) => { e.stopPropagation(); setBookmarkModal(selectedText); }}>
-              ðŸ”– ì±…ê°ˆí”¼ ì¶”ê°€
+              🔖 책갈피 추가
             </button>
           )}
         </div>
         {contextMenu && (
           <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
-            {contextMenu.type === 'message' && <button onClick={() => { setDeleteTarget({ type: 'message', index: contextMenu.data.index }); setContextMenu(null); }}>ðŸ—‘ï¸ ì‚­ì œ</button>}
-            {contextMenu.type === 'bookmark' && <button onClick={() => { setBookmarkModal(contextMenu.data); setContextMenu(null); }}>ðŸ”– ì±…ê°ˆí”¼</button>}
+            {contextMenu.type === 'message' && <button onClick={() => { setDeleteTarget({ type: 'message', index: contextMenu.data.index }); setContextMenu(null); }}>🗑️ 삭제</button>}
+            {contextMenu.type === 'bookmark' && <button onClick={() => { setBookmarkModal(contextMenu.data); setContextMenu(null); }}>🔖 책갈피</button>}
           </div>
         )}
         {deleteTarget?.type === 'message' && (
           <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <h3>ì‚­ì œ?</h3>
+              <h3>삭제?</h3>
               <div className="modal-buttons">
-                <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>ì·¨ì†Œ</button>
-                <button className="btn-submit btn-danger" onClick={() => handleDeleteMessage(deleteTarget.index)}>ì‚­ì œ</button>
+                <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>취소</button>
+                <button className="btn-submit btn-danger" onClick={() => handleDeleteMessage(deleteTarget.index)}>삭제</button>
               </div>
             </div>
           </div>
@@ -682,7 +682,7 @@ export default function FolderPage() {
         {bookmarkModal && (
           <div className="modal-overlay" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); setBookmarkImageUrl(null); }}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <h3>ðŸ”– ì±…ê°ˆí”¼</h3>
+              <h3>🔖 책갈피</h3>
               <div className="bookmark-preview" style={{ 
                 backgroundImage: bookmarkImage 
                   ? `url(${URL.createObjectURL(bookmarkImage)})` 
@@ -693,7 +693,7 @@ export default function FolderPage() {
                 <div className="bookmark-preview-overlay"><p>{bookmarkModal.text}</p></div>
               </div>
               <div className="form-group">
-                <label>ì´ë¯¸ì§€</label>
+                <label>이미지</label>
                 <div className="bookmark-image-options">
                   <input type="file" accept="image/*" onChange={(e) => { setBookmarkImage(e.target.files[0]); setBookmarkImageUrl(null); }} />
                   <button 
@@ -704,28 +704,28 @@ export default function FolderPage() {
                       setShowGalleryPicker(true); 
                     }}
                   >
-                    ðŸ–¼ï¸ ê°¤ëŸ¬ë¦¬ì—ì„œ ì„ íƒ
+                    🖼️ 갤러리에서 선택
                   </button>
                 </div>
               </div>
               <div className="modal-buttons">
-                <button className="btn-cancel" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); setBookmarkImageUrl(null); }}>ì·¨ì†Œ</button>
-                <button className="btn-submit" onClick={handleSaveBookmark} disabled={bookmarkSaving}>{bookmarkSaving ? '...' : 'ì €ìž¥'}</button>
+                <button className="btn-cancel" onClick={() => { setBookmarkModal(null); setBookmarkImage(null); setBookmarkImageUrl(null); }}>취소</button>
+                <button className="btn-submit" onClick={handleSaveBookmark} disabled={bookmarkSaving}>{bookmarkSaving ? '...' : '저장'}</button>
               </div>
             </div>
           </div>
         )}
         
-        {/* ê°¤ëŸ¬ë¦¬ ì„ íƒ ëª¨ë‹¬ */}
+        {/* 갤러리 선택 모달 */}
         {showGalleryPicker && (
           <div className="gallery-picker-overlay" onClick={() => setShowGalleryPicker(false)}>
             <div className="gallery-picker-modal" onClick={(e) => e.stopPropagation()}>
               <div className="gallery-modal-header">
-                <h3>ðŸ–¼ï¸ ì´ë¯¸ì§€ ì„ íƒ</h3>
-                <button className="list-modal-close" onClick={() => setShowGalleryPicker(false)}>âœ•</button>
+                <h3>🖼️ 이미지 선택</h3>
+                <button className="list-modal-close" onClick={() => setShowGalleryPicker(false)}>✕</button>
               </div>
               <div className="gallery-grid">
-                {galleryLoading && <p className="loading-text">ë¡œë”© ì¤‘...</p>}
+                {galleryLoading && <p className="loading-text">로딩 중...</p>}
                 {!galleryLoading && galleryImages.map((img, i) => (
                   <div key={i} className="gallery-item" onClick={() => { 
                     setBookmarkImageUrl(img.url); 
@@ -735,7 +735,7 @@ export default function FolderPage() {
                     <img src={img.url} alt={img.name} />
                   </div>
                 ))}
-                {!galleryLoading && galleryImages.length === 0 && <p className="empty">ê°¤ëŸ¬ë¦¬ê°€ ë¹„ì–´ìžˆìŠµë‹ˆë‹¤</p>}
+                {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
               </div>
             </div>
           </div>
@@ -743,20 +743,20 @@ export default function FolderPage() {
         {showThemeModal && (
           <div className="modal-overlay" onClick={() => setShowThemeModal(false)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <h3>ðŸŽ¨ í…Œë§ˆ ì¶”ê°€</h3>
+              <h3>🎨 테마 추가</h3>
               <div className="form-group">
-                <label>í…Œë§ˆ ì´ë¦„</label>
+                <label>테마 이름</label>
                 <input 
                   type="text" 
                   value={newThemeName} 
                   onChange={(e) => setNewThemeName(e.target.value)}
-                  placeholder="ì˜ˆ: ë‹¤í¬ëª¨ë“œ"
+                  placeholder="예: 다크모드"
                 />
               </div>
               <div className="form-group">
-                <label>CSS íŒŒì¼</label>
+                <label>CSS 파일</label>
                 <div className="file-drop" onClick={() => themeFileRef.current?.click()}>
-                  {newThemeCss ? `ðŸ“„ ${newThemeCss.name}` : 'í´ë¦­í•˜ì—¬ CSS íŒŒì¼ ì„ íƒ'}
+                  {newThemeCss ? `📄 ${newThemeCss.name}` : '클릭하여 CSS 파일 선택'}
                   <input 
                     ref={themeFileRef}
                     type="file" 
@@ -767,9 +767,9 @@ export default function FolderPage() {
                 </div>
               </div>
               <div className="modal-buttons">
-                <button className="btn-cancel" onClick={() => setShowThemeModal(false)}>ì·¨ì†Œ</button>
+                <button className="btn-cancel" onClick={() => setShowThemeModal(false)}>취소</button>
                 <button className="btn-submit" onClick={handleAddTheme} disabled={addingTheme}>
-                  {addingTheme ? 'ì¶”ê°€ ì¤‘...' : 'ì¶”ê°€'}
+                  {addingTheme ? '추가 중...' : '추가'}
                 </button>
               </div>
             </div>
@@ -779,26 +779,26 @@ export default function FolderPage() {
     );
   }
 
-  // ëŒ€ì‹œë³´ë“œ v2
+  // 대시보드 v2
   return (
     <>
       <Head><title>{sub}</title></Head>
       <div className="folder-dashboard-v2">
         
-        {/* ìƒë‹¨ í—¤ë”: ë²„íŠ¼ë“¤ */}
+        {/* 상단 헤더: 버튼들 */}
         <div className="top-header-area">
           <div></div>
           <div className="top-action-buttons">
-            <Link href="/"><button className="minimal-btn" style={{ background: themeColor }}>â† Home</button></Link>
-            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>ëª©ë¡ ({posts.length})</button>
-            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>ì±…ê°ˆí”¼ ({bookmarks.length})</button>
-            <button className="minimal-btn" style={{ background: themeColor }} onClick={openGallery}>ê°¤ëŸ¬ë¦¬</button>
+            <Link href="/"><button className="minimal-btn" style={{ background: themeColor }}>← Home</button></Link>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
+            <button className="minimal-btn" style={{ background: themeColor }} onClick={openGallery}>갤러리</button>
           </div>
         </div>
 
-        {/* ë©”ì¸ ê·¸ë¦¬ë“œ */}
+        {/* 메인 그리드 */}
         <div className="main-collage-grid">
-          {/* ì¢Œì¸¡ ë©”ì¸ êµ¬ì—­ */}
+          {/* 좌측 메인 구역 */}
           <div className="collage-left">
             <div className="main-image-wrapper" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}>
               <img 
@@ -811,7 +811,7 @@ export default function FolderPage() {
               <div className="big-name-display" style={{ WebkitTextStroke: `2px ${themeColor}` }}>
                 {(() => {
                   const nameParts = sub.split(' ');
-                  // ê°€ìž¥ ê¸´ ë‹¨ì–´ ê¸¸ì´ ì²´í¬
+                  // 가장 긴 단어 길이 체크
                   const maxLen = Math.max(...nameParts.map(p => p.length));
                   const isLong = maxLen > 8;
                   
@@ -838,7 +838,7 @@ export default function FolderPage() {
             </div>
           </div>
 
-          {/* ìš°ì¸¡ ì´ë¯¸ì§€ ìŠ¤íƒ êµ¬ì—­ - ì±…ê°ˆí”¼ ì´ë¯¸ì§€ 2ê°œ */}
+          {/* 우측 이미지 스택 구역 - 책갈피 이미지 2개 */}
           <div className="collage-right">
             <div className="stack-image-box" style={{ borderColor: themeColor }}>
               <img src={bookmarks[0]?.imageUrl || folderInfo?.imageUrl || '/placeholder.jpg'} alt="stack1" />
@@ -850,36 +850,36 @@ export default function FolderPage() {
         </div>
       </div>
 
-      {/* ê°¤ëŸ¬ë¦¬ ëª¨ë‹¬ */}
+      {/* 갤러리 모달 */}
       {showGalleryModal && (
         <div className="modal-overlay" onClick={() => setShowGalleryModal(false)}>
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
             <div className="gallery-modal-header">
-              <h3>ðŸ–¼ï¸ ê°¤ëŸ¬ë¦¬</h3>
-              <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>âœ•</button>
+              <h3>🖼️ 갤러리</h3>
+              <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
             </div>
             <div className="gallery-grid">
-              {galleryLoading && <p className="loading-text">ë¡œë”© ì¤‘...</p>}
+              {galleryLoading && <p className="loading-text">로딩 중...</p>}
               {!galleryLoading && galleryImages.map((img, i) => (
                 <div key={i} className="gallery-item" onClick={() => { setGalleryViewIndex(i); setShowGalleryViewer(true); }}>
                   <img src={img.url} alt={img.name} />
                 </div>
               ))}
-              {!galleryLoading && galleryImages.length === 0 && <p className="empty">ê°¤ëŸ¬ë¦¬ê°€ ë¹„ì–´ìžˆìŠµë‹ˆë‹¤</p>}
+              {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
             </div>
           </div>
         </div>
       )}
 
-      {/* ê°¤ëŸ¬ë¦¬ ìŠ¬ë¼ì´ë“œ ë·°ì–´ */}
+      {/* 갤러리 슬라이드 뷰어 */}
       {showGalleryViewer && galleryImages.length > 0 && (
         <div className="gallery-viewer-overlay" onClick={() => setShowGalleryViewer(false)}>
           <div className="gallery-viewer" onClick={(e) => e.stopPropagation()}>
-            <button className="gallery-nav prev" onClick={() => setGalleryViewIndex((galleryViewIndex - 1 + galleryImages.length) % galleryImages.length)}>â€¹</button>
+            <button className="gallery-nav prev" onClick={() => setGalleryViewIndex((galleryViewIndex - 1 + galleryImages.length) % galleryImages.length)}>‹</button>
             <img src={galleryImages[galleryViewIndex]?.url} alt={galleryImages[galleryViewIndex]?.name} />
-            <button className="gallery-nav next" onClick={() => setGalleryViewIndex((galleryViewIndex + 1) % galleryImages.length)}>â€º</button>
+            <button className="gallery-nav next" onClick={() => setGalleryViewIndex((galleryViewIndex + 1) % galleryImages.length)}>›</button>
             <div className="gallery-counter">{galleryViewIndex + 1} / {galleryImages.length}</div>
-            <button className="gallery-close" onClick={() => setShowGalleryViewer(false)}>âœ•</button>
+            <button className="gallery-close" onClick={() => setShowGalleryViewer(false)}>✕</button>
           </div>
         </div>
       )}
@@ -888,12 +888,12 @@ export default function FolderPage() {
         <div className="list-modal-overlay" onClick={() => setActiveTab('')}>
           <div className="list-modal" onClick={(e) => e.stopPropagation()}>
             <div className="list-modal-header">
-              <h3>{activeTab === 'posts' ? 'ðŸ“„ ëª©ë¡' : 'ðŸ”– ì±…ê°ˆí”¼'}</h3>
+              <h3>{activeTab === 'posts' ? '📄 목록' : '🔖 책갈피'}</h3>
               <div className="list-modal-actions">
                 {activeTab === 'posts' && (
                   <button className="list-add-btn" onClick={() => setShowModal(true)} style={{ background: themeColor }}>+</button>
                 )}
-                <button className="list-modal-close" onClick={() => setActiveTab('')}>âœ•</button>
+                <button className="list-modal-close" onClick={() => setActiveTab('')}>✕</button>
               </div>
             </div>
             {activeTab === 'posts' && (
@@ -903,7 +903,7 @@ export default function FolderPage() {
                     <span>{p.title}</span><small>{formatDate(p.createdAt)}</small>
                   </li>
                 ))}
-                {posts.length === 0 && <li className="empty">ì—†ìŒ</li>}
+                {posts.length === 0 && <li className="empty">없음</li>}
               </ul>
             )}
             {activeTab === 'bookmarks' && (
@@ -913,7 +913,7 @@ export default function FolderPage() {
                     <p>{b.text.slice(0, 40)}...</p>
                   </div>
                 ))}
-                {bookmarks.length === 0 && <p className="empty">ì—†ìŒ</p>}
+                {bookmarks.length === 0 && <p className="empty">없음</p>}
               </div>
             )}
           </div>
@@ -922,17 +922,17 @@ export default function FolderPage() {
 
       {contextMenu?.type === 'post' && (
         <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
-          <button onClick={() => { setDeleteTarget({ type: 'post', ...contextMenu.data.post }); setContextMenu(null); }}>ðŸ—‘ï¸ ì‚­ì œ</button>
+          <button onClick={() => { setDeleteTarget({ type: 'post', ...contextMenu.data.post }); setContextMenu(null); }}>🗑️ 삭제</button>
         </div>
       )}
 
       {deleteTarget?.type === 'post' && (
         <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>ì‚­ì œ?</h3><p>{deleteTarget.title}</p>
+            <h3>삭제?</h3><p>{deleteTarget.title}</p>
             <div className="modal-buttons">
-              <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>ì·¨ì†Œ</button>
-              <button className="btn-submit btn-danger" onClick={handleDeletePost}>ì‚­ì œ</button>
+              <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>취소</button>
+              <button className="btn-submit btn-danger" onClick={handleDeletePost}>삭제</button>
             </div>
           </div>
         </div>
@@ -941,16 +941,16 @@ export default function FolderPage() {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>ðŸ“ ë“±ë¡</h3>
-            <div className="form-group"><label>ì œëª©</label><input value={uploadData.title} onChange={(e) => setUploadData({ title: e.target.value })} /></div>
-            <div className="form-group"><label>íŒŒì¼</label>
-              <div className="file-drop" onClick={() => fileInputRef.current?.click()}>{uploadFile ? uploadFile.name : 'ì„ íƒ'}
+            <h3>📝 등록</h3>
+            <div className="form-group"><label>제목</label><input value={uploadData.title} onChange={(e) => setUploadData({ title: e.target.value })} /></div>
+            <div className="form-group"><label>파일</label>
+              <div className="file-drop" onClick={() => fileInputRef.current?.click()}>{uploadFile ? uploadFile.name : '선택'}
                 <input ref={fileInputRef} type="file" accept=".json,.jsonl" onChange={(e) => setUploadFile(e.target.files[0])} style={{ display: 'none' }} />
               </div>
             </div>
             <div className="modal-buttons">
-              <button className="btn-cancel" onClick={() => setShowModal(false)}>ì·¨ì†Œ</button>
-              <button className="btn-submit" onClick={handleUpload} disabled={uploading}>{uploading ? '...' : 'ë“±ë¡'}</button>
+              <button className="btn-cancel" onClick={() => setShowModal(false)}>취소</button>
+              <button className="btn-submit" onClick={handleUpload} disabled={uploading}>{uploading ? '...' : '등록'}</button>
             </div>
           </div>
         </div>
