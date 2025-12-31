@@ -877,7 +877,29 @@ export default function FolderPage() {
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
             <div className="gallery-modal-header">
               <h3>🖼️ 갤러리</h3>
-              <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
+              <div className="gallery-modal-actions">
+                {check19Gallery() && !show19Gallery && (
+                  <button 
+                    className="list-add-btn" 
+                    onClick={(e) => { e.stopPropagation(); setShowPasswordPrompt(true); }}
+                    style={{ background: '#dc2626' }}
+                    title="19+ 갤러리 잠금 해제"
+                  >
+                    🔒
+                  </button>
+                )}
+                {check19Gallery() && show19Gallery && (
+                  <button 
+                    className="list-add-btn" 
+                    onClick={(e) => { e.stopPropagation(); setShow19Gallery(false); loadGalleryImages(); }}
+                    style={{ background: '#10b981' }}
+                    title="19+ 갤러리 잠금"
+                  >
+                    🔓
+                  </button>
+                )}
+                <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
+              </div>
             </div>
             <div className="gallery-grid">
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
