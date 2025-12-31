@@ -262,17 +262,16 @@ export default function FolderPage() {
   };
 
   const handlePasswordSubmit = () => {
-    if (galleryPassword === '0406') {
-      setShow19Gallery(true);
-      setShowPasswordPrompt(false);
-      setGalleryPassword('');
-      showToast('갤러리 잠금 해제!', 'success');
-      loadGalleryImages(); // 이 줄 추가
-    } else {
-      showToast('비밀번호가 틀렸습니다', 'error');
-      setGalleryPassword('');
-    }
-  };
+  if (galleryPassword === '0406') {
+    setShow19Gallery(true);
+    setShowPasswordPrompt(false);
+    setGalleryPassword('');
+    showToast('19+ 갤러리 열림!', 'success');
+  } else {
+    showToast('비밀번호가 틀렸습니다', 'error');
+    setGalleryPassword('');
+  }
+};
 
   // 모든 ZIP 파일 + 일반 이미지에서 추출
   const loadGalleryImages = async () => {
@@ -815,6 +814,15 @@ useEffect(() => {
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={openGallery}>갤러리</button>
+            {check19Gallery() && (
+              <button 
+                className="minimal-btn" 
+                style={{ background: '#dc2626' }} 
+                onClick={() => setShowPasswordPrompt(true)}
+              >
+                🔒 19+
+              </button>
+            )}
           </div>
         </div>
 
@@ -878,36 +886,7 @@ useEffect(() => {
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
             <div className="gallery-modal-header">
               <h3>🖼️ 갤러리</h3>
-              <div className="gallery-modal-actions">
-                {check19Gallery() && !show19Gallery && (
-                  <button 
-                    className="list-add-btn" 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      setShowPasswordPrompt(true); 
-                    }}
-                    style={{ background: '#dc2626' }}
-                    title="19+ 갤러리 잠금 해제"
-                  >
-                    🔒
-                  </button>
-                )}
-                {check19Gallery() && show19Gallery && (
-                  <button 
-                    className="list-add-btn" 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      setShow19Gallery(false); 
-                      loadGalleryImages(); 
-                    }}
-                    style={{ background: '#10b981' }}
-                    title="19+ 갤러리 잠금"
-                  >
-                    🔓
-                  </button>
-                )}
-                <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
-              </div>
+              <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
             </div>
             <div className="gallery-grid">
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
@@ -922,29 +901,38 @@ useEffect(() => {
         </div>
       )}
 
-      {/* 19 갤러리 비밀번호 프롬프트 */}
-      {showPasswordPrompt && (
-        <div className="modal-overlay" onClick={() => setShowPasswordPrompt(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>🔒 19+ 갤러리 잠금 해제</h3>
-            <div className="form-group">
-              <label>비밀번호</label>
-              <input 
-                type="password" 
-                value={galleryPassword}
-                onChange={(e) => setGalleryPassword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
-                placeholder="비밀번호를 입력하세요"
-                autoFocus
-              />
-            </div>
-            <div className="modal-buttons">
-              <button className="btn-cancel" onClick={() => { setShowPasswordPrompt(false); setGalleryPassword(''); }}>취소</button>
-              <button className="btn-submit" onClick={handlePasswordSubmit}>확인</button>
-            </div>
+      {/* 19+ 갤러리 모달 */}
+    {show19Gallery && (
+      <div className="modal-overlay" onClick={() => setShow19Gallery(false)}>
+        <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="gallery-modal-header">
+            <h3>🔒 19+ 갤러리</h3>
+            <button className="list-modal-close" onClick={() => setShow19Gallery(false)}>✕</button>
+          </div>
+          <div className="gallery-grid">
+            {galleryLoading && <p className="loading-text">로딩 중...</p>}
+            {!galleryLoading && galleryImages
+              .filter(img => {
+                const item = gallery.find(g => g.fileUrl === img.url || g.name === img.zipName);
+                return item?.name?.includes('19') || item?.sub?.includes('19');
+              })
+              .map((img, i) => (
+                <div key={i} className="gallery-item" onClick={() => { 
+                  const filteredIndex = galleryImages.findIndex(g => g.url === img.url);
+                  setGalleryViewIndex(filteredIndex); 
+                  setShowGalleryViewer(true); 
+                }}>
+                  <img src={img.url} alt={img.name} />
+                </div>
+              ))}
+            {!galleryLoading && galleryImages.filter(img => {
+              const item = gallery.find(g => g.fileUrl === img.url || g.name === img.zipName);
+              return item?.name?.includes('19') || item?.sub?.includes('19');
+            }).length === 0 && <p className="empty">19+ 갤러리가 비어있습니다</p>}
           </div>
         </div>
-      )}
+      </div>
+    )}
 
       {/* 갤러리 슬라이드 뷰어 */}
       {showGalleryViewer && galleryImages.length > 0 && (
