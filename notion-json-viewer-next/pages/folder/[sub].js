@@ -51,7 +51,7 @@ export default function FolderPage() {
   const themeFileRef = useRef(null);
   const [customCss, setCustomCss] = useState('');
 
-  // 갤러리 (ZIP 방식)
+ // 갤러리 (ZIP 방식)
   const [gallery, setGallery] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const [galleryLoading, setGalleryLoading] = useState(false);
@@ -59,6 +59,13 @@ export default function FolderPage() {
   const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
   const [galleryViewIndex, setGalleryViewIndex] = useState(0);
   const [showGalleryViewer, setShowGalleryViewer] = useState(false);
+  
+  // 19 갤러리 보호
+  const [show19Gallery, setShow19Gallery] = useState(false);
+  const [galleryPassword, setGalleryPassword] = useState('');
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
   
   // 책갈피용 갤러리 선택
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
