@@ -265,7 +265,8 @@ export default function FolderPage() {
   };
 
   // 모든 ZIP 파일 + 일반 이미지에서 추출
-  const loadGalleryImages = async (includePrivate = false) => {
+  // showPrivateOnly: true면 private=true인 것만, false면 private=false인 것만
+  const loadGalleryImages = async (showPrivateOnly = false) => {
     if (gallery.length === 0) {
       setGalleryImages([]);
       return;
@@ -276,10 +277,10 @@ export default function FolderPage() {
       const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
-      // private 체크된 항목 필터링 (비밀번호 미입력 시 제외)
-      const filteredGallery = includePrivate 
-        ? gallery 
-        : gallery.filter(g => !g.isPrivate);
+      // showPrivateOnly에 따라 필터링
+      const filteredGallery = showPrivateOnly 
+        ? gallery.filter(g => g.isPrivate === true)  // private만
+        : gallery.filter(g => !g.isPrivate);          // private 아닌 것만
       
       // ZIP 파일들
       const zipItems = filteredGallery.filter(g => g.isZip && g.fileUrl);
@@ -367,11 +368,11 @@ export default function FolderPage() {
     }
   };
 
-  // 갤러리 모달 열 때 이미지 로드
+  // 갤러리 모달 열 때 - private 체크 안 된 것만
   const openGallery = async () => {
-    setVisibleCount(30); // 초기화
+    setVisibleCount(30);
     setShowGalleryModal(true);
-    await loadGalleryImages(privateUnlocked);
+    await loadGalleryImages(false); // private=false 인 것만
   };
   
   // Private 갤러리 열기
@@ -379,16 +380,16 @@ export default function FolderPage() {
     setShowPasswordModal(true);
   };
   
-  // 비밀번호 확인
+  // 비밀번호 확인 - private 체크 된 것만
   const handlePasswordSubmit = async () => {
     if (passwordInput === '0406') {
       setPrivateUnlocked(true);
       setShowPasswordModal(false);
       setPasswordInput('');
       setPasswordError('');
-      setVisibleCount(30); // 초기화
+      setVisibleCount(30);
       setShowGalleryModal(true);
-      await loadGalleryImages(true);
+      await loadGalleryImages(true); // private=true 인 것만
     } else {
       setPasswordError('비밀번호가 틀렸습니다');
     }
@@ -398,7 +399,6 @@ export default function FolderPage() {
   const handleGalleryScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     if (scrollTop + clientHeight >= scrollHeight - 200) {
-      // 바닥에서 200px 위에 도달하면 더 로드
       setVisibleCount(prev => Math.min(prev + 30, galleryImages.length));
     }
   };
@@ -875,11 +875,9 @@ export default function FolderPage() {
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={openGallery}>갤러리</button>
-            {isPrivateGallery && (
-              <button className="minimal-btn" style={{ background: '#333' }} onClick={openPrivateGallery}>
-                🔒 Private
-              </button>
-            )}
+            <button className="minimal-btn" style={{ background: '#333' }} onClick={openPrivateGallery}>
+              🔒 Private
+            </button>
           </div>
         </div>
 
@@ -942,10 +940,10 @@ export default function FolderPage() {
         <div className="modal-overlay" onClick={() => setShowGalleryModal(false)}>
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
             <div className="gallery-modal-header">
-              <h3>🖼️ 갤러리 {privateUnlocked && <span style={{ color: '#e74c3c', fontSize: '12px' }}>(Private 포함)</span>}</h3>
+              <h3>🖼️ {privateUnlocked ? '🔒 Private' : '갤러리'}</h3>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <span style={{ fontSize: '12px', color: '#888' }}>{galleryImages.length}장</span>
-                <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
+                <button className="list-modal-close" onClick={() => { setShowGalleryModal(false); setPrivateUnlocked(false); }}>✕</button>
               </div>
             </div>
             <div className="gallery-grid" ref={galleryGridRef} onScroll={handleGalleryScroll}>
