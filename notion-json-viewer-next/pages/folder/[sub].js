@@ -898,8 +898,8 @@ export default function FolderPage() {
                   const nameParts = sub.split(' ');
                   // 가장 긴 단어 길이 체크
                   const maxLen = Math.max(...nameParts.map(p => p.length));
-                  const isLong = maxLen > 8;      // 8자 초과면 small
-                  const isVeryLong = maxLen > 10; // 10자 초과면 xsmall
+                  const isLong = maxLen >= 8;      // 8자 이상이면 small
+                  const isVeryLong = maxLen >= 10; // 10자 이상이면 xsmall
                   const sizeClass = isVeryLong ? 'xsmall' : isLong ? 'small' : '';
                   
                   if (nameParts.length === 3) {
