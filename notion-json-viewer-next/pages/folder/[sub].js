@@ -35,6 +35,12 @@ export default function FolderPage() {
   const viewerRef = useRef(null);
   const longPressTimer = useRef(null);
   
+  // 메인 이미지 수정 모달
+  const [showMainImageModal, setShowMainImageModal] = useState(false);
+  const [mainImageFile, setMainImageFile] = useState(null);
+  const [mainImageSaving, setMainImageSaving] = useState(false);
+  const mainImageInputRef = useRef(null);
+  
   // 헤더 표시 상태
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollTop = useRef(0);
@@ -507,6 +513,63 @@ export default function FolderPage() {
     }
   };
 
+  const handleDeleteBookmark = async () => {
+    if (!deleteTarget?.id) return;
+    try {
+      const res = await fetch(`/api/deleteBookmark?pageId=${deleteTarget.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      showToast('책갈피 삭제 완료!', 'success');
+      setDeleteTarget(null);
+      fetchBookmarks();
+    } catch (err) {
+      showToast('삭제 실패: ' + err.message, 'error');
+    }
+  };
+
+  // 롱프레스 핸들러
+  const handleLongPressStart = (e, type, data) => {
+    e.preventDefault();
+    longPressTimer.current = setTimeout(() => {
+      const touch = e.touches?.[0] || e;
+      setContextMenu({
+        x: Math.min(touch.clientX || 100, window.innerWidth - 150),
+        y: Math.min(touch.clientY || 100, window.innerHeight - 100),
+        type,
+        data
+      });
+    }, 500);
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  // 메인 이미지 수정
+  const handleMainImageSave = async () => {
+    if (!mainImageFile) return;
+    setMainImageSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('folderId', folderInfo.id);
+      formData.append('image', mainImageFile);
+      const res = await fetch('/api/updateFolder', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      showToast('이미지 수정 완료!', 'success');
+      setShowMainImageModal(false);
+      setMainImageFile(null);
+      fetchFolderInfo();
+    } catch (err) {
+      showToast('수정 실패: ' + err.message, 'error');
+    } finally {
+      setMainImageSaving(false);
+    }
+  };
+
   const handleDeleteMessage = async (index) => {
     try {
       const res = await fetch('/api/deleteMessage', {
@@ -885,7 +948,19 @@ export default function FolderPage() {
         <div className="main-collage-grid">
           {/* 좌측 메인 구역 */}
           <div className="collage-left">
-            <div className="main-image-wrapper" style={{ borderColor: themeColor }} onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}>
+            <div 
+              className="main-image-wrapper" 
+              style={{ borderColor: themeColor }} 
+              onClick={() => { fetchPosts(); fetchBookmarks(); fetchFolderInfo(); fetchGallery(); }}
+              onContextMenu={(e) => { e.preventDefault(); setShowMainImageModal(true); }}
+              onTouchStart={(e) => {
+                longPressTimer.current = setTimeout(() => {
+                  setShowMainImageModal(true);
+                }, 500);
+              }}
+              onTouchEnd={handleLongPressEnd}
+              onTouchMove={handleLongPressEnd}
+            >
               <img 
                 src={folderInfo?.imageUrl || '/placeholder.jpg'} 
                 className="main-img-frame" 
@@ -1007,7 +1082,16 @@ export default function FolderPage() {
             {activeTab === 'bookmarks' && (
               <div className="bookmark-grid">
                 {bookmarks.map((b, i) => (
-                  <div key={i} className="bookmark-item" style={{ backgroundImage: b.imageUrl ? `url(${b.imageUrl})` : `linear-gradient(${themeColor}, #111)` }} onClick={() => setSelectedBookmark(b)}>
+                  <div 
+                    key={i} 
+                    className="bookmark-item" 
+                    style={{ backgroundImage: b.imageUrl ? `url(${b.imageUrl})` : `linear-gradient(${themeColor}, #111)` }} 
+                    onClick={() => setSelectedBookmark(b)}
+                    onContextMenu={(e) => handleContextMenu(e, 'bookmark-delete', { bookmark: b })}
+                    onTouchStart={(e) => handleLongPressStart(e, 'bookmark-delete', { bookmark: b })}
+                    onTouchEnd={handleLongPressEnd}
+                    onTouchMove={handleLongPressEnd}
+                  >
                     <p>{b.text.slice(0, 40)}...</p>
                   </div>
                 ))}
@@ -1024,6 +1108,12 @@ export default function FolderPage() {
         </div>
       )}
 
+      {contextMenu?.type === 'bookmark-delete' && (
+        <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }}>
+          <button onClick={() => { setDeleteTarget({ type: 'bookmark', ...contextMenu.data.bookmark }); setContextMenu(null); }}>🗑️ 삭제</button>
+        </div>
+      )}
+
       {deleteTarget?.type === 'post' && (
         <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
@@ -1031,6 +1121,55 @@ export default function FolderPage() {
             <div className="modal-buttons">
               <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>취소</button>
               <button className="btn-submit btn-danger" onClick={handleDeletePost}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget?.type === 'bookmark' && (
+        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>책갈피 삭제?</h3>
+            <p style={{ fontSize: '14px', color: '#666' }}>{deleteTarget.text?.slice(0, 50)}...</p>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => setDeleteTarget(null)}>취소</button>
+              <button className="btn-submit btn-danger" onClick={handleDeleteBookmark}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 메인 이미지 수정 모달 */}
+      {showMainImageModal && (
+        <div className="modal-overlay" onClick={() => { setShowMainImageModal(false); setMainImageFile(null); }}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>🖼️ 메인 이미지 수정</h3>
+            <div className="form-group">
+              <div 
+                className="file-drop" 
+                onClick={() => mainImageInputRef.current?.click()}
+                style={{ 
+                  backgroundImage: mainImageFile ? `url(${URL.createObjectURL(mainImageFile)})` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  minHeight: '150px'
+                }}
+              >
+                {!mainImageFile && '클릭하여 이미지 선택'}
+                <input 
+                  ref={mainImageInputRef}
+                  type="file" 
+                  accept="image/*"
+                  onChange={(e) => setMainImageFile(e.target.files[0])}
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => { setShowMainImageModal(false); setMainImageFile(null); }}>취소</button>
+              <button className="btn-submit" onClick={handleMainImageSave} disabled={!mainImageFile || mainImageSaving}>
+                {mainImageSaving ? '저장 중...' : '저장'}
+              </button>
             </div>
           </div>
         </div>
