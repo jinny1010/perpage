@@ -64,6 +64,13 @@ export default function FolderPage() {
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
   const [bookmarkImageUrl, setBookmarkImageUrl] = useState(null);
 
+  // Private 갤러리 (이름에 19 포함)
+  const [isPrivateGallery, setIsPrivateGallery] = useState(false);
+  const [privateUnlocked, setPrivateUnlocked] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
   // 제목 수정
   const [editingTitle, setEditingTitle] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -242,8 +249,13 @@ export default function FolderPage() {
       const res = await fetch(`/api/gallery?sub=${encodeURIComponent(sub)}`);
       const data = await res.json();
       if (res.ok) {
-        setGallery(data.gallery || []);
-        setFavorites((data.gallery || []).filter(g => g.favorite));
+        const galleryData = data.gallery || [];
+        setGallery(galleryData);
+        setFavorites(galleryData.filter(g => g.favorite));
+        
+        // 이름에 19가 포함된 항목이 있는지 체크
+        const hasPrivate = galleryData.some(g => g.name?.includes('19'));
+        setIsPrivateGallery(hasPrivate);
       }
     } catch (err) {
       console.error('갤러리 로드 실패:', err);
@@ -251,7 +263,7 @@ export default function FolderPage() {
   };
 
   // 모든 ZIP 파일 + 일반 이미지에서 추출
-  const loadGalleryImages = async () => {
+  const loadGalleryImages = async (includePrivate = false) => {
     if (gallery.length === 0) {
       setGalleryImages([]);
       return;
@@ -262,19 +274,33 @@ export default function FolderPage() {
       const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
+      // 19 포함 항목 필터링 (비밀번호 미입력 시)
+      const filteredGallery = includePrivate 
+        ? gallery 
+        : gallery.filter(g => !g.name?.includes('19'));
+      
       // ZIP 파일들
-      const zipItems = gallery.filter(g => g.isZip && g.fileUrl);
+      const zipItems = filteredGallery.filter(g => g.isZip && g.fileUrl);
       
       // 일반 이미지 파일들
-      const imageItems = gallery.filter(g => {
+      const imageItems = filteredGallery.filter(g => {
         if (!g.fileUrl || g.isZip) return false;
         const ext = g.fileName?.toLowerCase() || g.fileUrl.toLowerCase();
         return imageExtensions.some(e => ext.includes(e));
       });
 
-      // 일반 이미지 추가
+      // 일반 이미지 추가 (Notion URL에서 파일명 추출)
       for (const img of imageItems) {
-        allImages.push({ name: img.name || img.fileName, url: img.fileUrl });
+        // Notion URL에서 파일명 추출
+        // 형식: https://www.notion.so/image/attachment%3A...%3AKillian_Vane_2025-12-2121h45m28s.png?...
+        let fileName = img.name || img.fileName || '';
+        if (!fileName && img.fileUrl) {
+          const urlMatch = img.fileUrl.match(/%3A([^%?]+\.(?:png|jpg|jpeg|gif|webp))/i);
+          if (urlMatch) {
+            fileName = decodeURIComponent(urlMatch[1]);
+          }
+        }
+        allImages.push({ name: fileName, url: img.fileUrl });
       }
 
       // ZIP 파일 처리
@@ -302,8 +328,34 @@ export default function FolderPage() {
         }
       }
       
-      // 파일명 정렬
-      allImages.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      // 파일명에서 날짜/시간 추출해서 정렬 (최신이 위로)
+      // 형식: Killian_Vane_2025-12-2121h45m28s.png
+      const extractDateTime = (name) => {
+        // 파일명에서 날짜시간 패턴 찾기
+        const match = name?.match(/(\d{4}-\d{1,2}-\d{1,2})(\d{1,2}h\d{1,2}m\d{1,2}s)?/);
+        if (match) {
+          const datePart = match[1]; // 2025-12-21
+          const timePart = match[2] || '00h00m00s'; // 21h45m28s
+          
+          // 시간 파싱
+          const timeMatch = timePart.match(/(\d+)h(\d+)m(\d+)s/);
+          const hours = timeMatch ? parseInt(timeMatch[1]) : 0;
+          const mins = timeMatch ? parseInt(timeMatch[2]) : 0;
+          const secs = timeMatch ? parseInt(timeMatch[3]) : 0;
+          
+          const dateStr = `${datePart}T${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+          return new Date(dateStr).getTime();
+        }
+        return 0;
+      };
+      
+      // 최신순 정렬 (날짜가 큰 게 먼저)
+      allImages.sort((a, b) => {
+        const dateA = extractDateTime(a.name);
+        const dateB = extractDateTime(b.name);
+        return dateB - dateA; // 내림차순 (최신이 위)
+      });
+      
       setGalleryImages(allImages);
     } catch (err) {
       console.error('갤러리 로드 실패:', err);
@@ -316,8 +368,25 @@ export default function FolderPage() {
   // 갤러리 모달 열 때 이미지 로드
   const openGallery = async () => {
     setShowGalleryModal(true);
-    if (galleryImages.length === 0) {
-      await loadGalleryImages();
+    await loadGalleryImages(privateUnlocked);
+  };
+  
+  // Private 갤러리 열기
+  const openPrivateGallery = () => {
+    setShowPasswordModal(true);
+  };
+  
+  // 비밀번호 확인
+  const handlePasswordSubmit = async () => {
+    if (passwordInput === '0406') {
+      setPrivateUnlocked(true);
+      setShowPasswordModal(false);
+      setPasswordInput('');
+      setPasswordError('');
+      setShowGalleryModal(true);
+      await loadGalleryImages(true);
+    } else {
+      setPasswordError('비밀번호가 틀렸습니다');
     }
   };
 
@@ -793,6 +862,11 @@ export default function FolderPage() {
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('posts')}>목록 ({posts.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={() => setActiveTab('bookmarks')}>책갈피 ({bookmarks.length})</button>
             <button className="minimal-btn" style={{ background: themeColor }} onClick={openGallery}>갤러리</button>
+            {isPrivateGallery && (
+              <button className="minimal-btn" style={{ background: '#333' }} onClick={openPrivateGallery}>
+                🔒 Private
+              </button>
+            )}
           </div>
         </div>
 
@@ -855,14 +929,17 @@ export default function FolderPage() {
         <div className="modal-overlay" onClick={() => setShowGalleryModal(false)}>
           <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
             <div className="gallery-modal-header">
-              <h3>🖼️ 갤러리</h3>
-              <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
+              <h3>🖼️ 갤러리 {privateUnlocked && <span style={{ color: '#e74c3c', fontSize: '12px' }}>(Private 포함)</span>}</h3>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#888' }}>{galleryImages.length}장</span>
+                <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
+              </div>
             </div>
             <div className="gallery-grid">
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
               {!galleryLoading && galleryImages.map((img, i) => (
                 <div key={i} className="gallery-item" onClick={() => { setGalleryViewIndex(i); setShowGalleryViewer(true); }}>
-                  <img src={img.url} alt={img.name} />
+                  <img src={img.url} alt={img.name} loading="lazy" />
                 </div>
               ))}
               {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
@@ -957,6 +1034,32 @@ export default function FolderPage() {
       )}
 
       <ImageViewer bookmark={selectedBookmark} onClose={() => { setSelectedBookmark(null); setActiveTab('bookmarks'); }} />
+      
+      {/* 비밀번호 입력 모달 */}
+      {showPasswordModal && (
+        <div className="modal-overlay" onClick={() => { setShowPasswordModal(false); setPasswordInput(''); setPasswordError(''); }}>
+          <div className="modal password-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>🔒 Private Gallery</h3>
+            <p style={{ marginBottom: '15px', color: '#666', fontSize: '14px' }}>비밀번호를 입력하세요</p>
+            <div className="form-group">
+              <input 
+                type="password" 
+                value={passwordInput}
+                onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(''); }}
+                onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                placeholder="비밀번호"
+                autoFocus
+                style={{ textAlign: 'center', fontSize: '18px', letterSpacing: '8px' }}
+              />
+            </div>
+            {passwordError && <p style={{ color: '#e74c3c', fontSize: '13px', marginBottom: '10px' }}>{passwordError}</p>}
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => { setShowPasswordModal(false); setPasswordInput(''); setPasswordError(''); }}>취소</button>
+              <button className="btn-submit" onClick={handlePasswordSubmit}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
