@@ -782,7 +782,7 @@ export default function FolderPage() {
                     type="button" 
                     className="btn-gallery-pick" 
                     onClick={async () => { 
-                      if (galleryImages.length === 0) await loadGalleryImages(); 
+                      await loadGalleryImages(false); // 항상 일반 갤러리만 (private=false)
                       setShowGalleryPicker(true); 
                     }}
                   >
@@ -898,25 +898,27 @@ export default function FolderPage() {
                   const nameParts = sub.split(' ');
                   // 가장 긴 단어 길이 체크
                   const maxLen = Math.max(...nameParts.map(p => p.length));
-                  const isLong = maxLen > 8;
+                  const isLong = maxLen > 8;      // 8자 초과면 small
+                  const isVeryLong = maxLen > 10; // 10자 초과면 xsmall
+                  const sizeClass = isVeryLong ? 'xsmall' : isLong ? 'small' : '';
                   
                   if (nameParts.length === 3) {
                     return (
                       <>
-                        <span className={`name-first ${isLong ? 'small' : ''}`}>{nameParts[0]}</span>
+                        <span className={`name-first ${sizeClass}`}>{nameParts[0]}</span>
                         <span className="name-middle">{nameParts[1]}</span>
-                        <span className={`name-last ${isLong ? 'small' : ''}`}>{nameParts[2]}</span>
+                        <span className={`name-last ${sizeClass}`}>{nameParts[2]}</span>
                       </>
                     );
                   } else if (nameParts.length === 2) {
                     return (
                       <>
-                        <span className={`name-first ${isLong ? 'small' : ''}`}>{nameParts[0]}</span>
-                        <span className={`name-last ${isLong ? 'small' : ''}`}>{nameParts[1]}</span>
+                        <span className={`name-first ${sizeClass}`}>{nameParts[0]}</span>
+                        <span className={`name-last ${sizeClass}`}>{nameParts[1]}</span>
                       </>
                     );
                   } else {
-                    return <span className={`name-single ${isLong ? 'small' : ''}`}>{sub}</span>;
+                    return <span className={`name-single ${sizeClass}`}>{sub}</span>;
                   }
                 })()}
               </div>
