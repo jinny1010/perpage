@@ -1031,7 +1031,6 @@ export default function FolderPage() {
                     src={img.url} 
                     alt={img.name} 
                     loading="lazy"
-                    onLoad={(e) => e.target.classList.add('loaded')}
                   />
                 </div>
               ))}

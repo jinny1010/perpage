@@ -2716,12 +2716,6 @@ a, a:link, a:visited, a:hover, a:active {
 .gallery-item img {
   position: relative;
   z-index: 1;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.gallery-item img.loaded {
-  opacity: 1;
 }
 
 @keyframes shimmer {
