@@ -59,6 +59,8 @@ export default function FolderPage() {
   const [selectedGalleryImage, setSelectedGalleryImage] = useState(null);
   const [galleryViewIndex, setGalleryViewIndex] = useState(0);
   const [showGalleryViewer, setShowGalleryViewer] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(30); // 처음에 30개만 보여주기
+  const galleryGridRef = useRef(null);
   
   // 책갈피용 갤러리 선택
   const [showGalleryPicker, setShowGalleryPicker] = useState(false);
@@ -253,8 +255,8 @@ export default function FolderPage() {
         setGallery(galleryData);
         setFavorites(galleryData.filter(g => g.favorite));
         
-        // 이름에 19가 포함된 항목이 있는지 체크
-        const hasPrivate = galleryData.some(g => g.name?.includes('19'));
+        // private 체크박스가 true인 항목이 있는지 확인
+        const hasPrivate = galleryData.some(g => g.isPrivate === true);
         setIsPrivateGallery(hasPrivate);
       }
     } catch (err) {
@@ -274,10 +276,10 @@ export default function FolderPage() {
       const allImages = [];
       const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
       
-      // 19 포함 항목 필터링 (비밀번호 미입력 시)
+      // private 체크된 항목 필터링 (비밀번호 미입력 시 제외)
       const filteredGallery = includePrivate 
         ? gallery 
-        : gallery.filter(g => !g.name?.includes('19'));
+        : gallery.filter(g => !g.isPrivate);
       
       // ZIP 파일들
       const zipItems = filteredGallery.filter(g => g.isZip && g.fileUrl);
@@ -367,6 +369,7 @@ export default function FolderPage() {
 
   // 갤러리 모달 열 때 이미지 로드
   const openGallery = async () => {
+    setVisibleCount(30); // 초기화
     setShowGalleryModal(true);
     await loadGalleryImages(privateUnlocked);
   };
@@ -383,10 +386,20 @@ export default function FolderPage() {
       setShowPasswordModal(false);
       setPasswordInput('');
       setPasswordError('');
+      setVisibleCount(30); // 초기화
       setShowGalleryModal(true);
       await loadGalleryImages(true);
     } else {
       setPasswordError('비밀번호가 틀렸습니다');
+    }
+  };
+  
+  // 갤러리 스크롤 시 더 로드
+  const handleGalleryScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    if (scrollTop + clientHeight >= scrollHeight - 200) {
+      // 바닥에서 200px 위에 도달하면 더 로드
+      setVisibleCount(prev => Math.min(prev + 30, galleryImages.length));
     }
   };
 
@@ -935,14 +948,22 @@ export default function FolderPage() {
                 <button className="list-modal-close" onClick={() => setShowGalleryModal(false)}>✕</button>
               </div>
             </div>
-            <div className="gallery-grid">
+            <div className="gallery-grid" ref={galleryGridRef} onScroll={handleGalleryScroll}>
               {galleryLoading && <p className="loading-text">로딩 중...</p>}
-              {!galleryLoading && galleryImages.map((img, i) => (
+              {!galleryLoading && galleryImages.slice(0, visibleCount).map((img, i) => (
                 <div key={i} className="gallery-item" onClick={() => { setGalleryViewIndex(i); setShowGalleryViewer(true); }}>
-                  <img src={img.url} alt={img.name} loading="lazy" />
+                  <img 
+                    src={img.url} 
+                    alt={img.name} 
+                    loading="lazy"
+                    onLoad={(e) => e.target.classList.add('loaded')}
+                  />
                 </div>
               ))}
               {!galleryLoading && galleryImages.length === 0 && <p className="empty">갤러리가 비어있습니다</p>}
+              {!galleryLoading && visibleCount < galleryImages.length && (
+                <p className="loading-text" style={{ gridColumn: '1 / -1' }}>스크롤하면 더 로드됩니다... ({visibleCount}/{galleryImages.length})</p>
+              )}
             </div>
           </div>
         </div>

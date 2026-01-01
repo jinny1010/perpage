@@ -2394,20 +2394,22 @@ a, a:link, a:visited, a:hover, a:active {
   gap: 12px;
   overflow-y: auto;
   flex: 1;
-  align-content: start;
 }
 
 .gallery-item {
   position: relative;
-  aspect-ratio: 1;
+  width: 100%;
+  padding-bottom: 100%; /* 1:1 비율 유지 */
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   background: #f5f5f5;
-  min-height: 0;
 }
 
 .gallery-item img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -2680,21 +2682,7 @@ a, a:link, a:visited, a:hover, a:active {
   border-color: #333;
 }
 
-/* 갤러리 로딩 최적화 */
-.gallery-item {
-  contain: layout style paint;
-}
-
-.gallery-item img {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.gallery-item img[src] {
-  opacity: 1;
-}
-
-/* 갤러리 스켈레톤 로딩 */
+/* 갤러리 로딩 스켈레톤 */
 .gallery-item::before {
   content: '';
   position: absolute;
@@ -2709,8 +2697,13 @@ a, a:link, a:visited, a:hover, a:active {
 }
 
 .gallery-item img {
-  position: relative;
   z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.gallery-item img.loaded {
+  opacity: 1;
 }
 
 @keyframes shimmer {
