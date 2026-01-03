@@ -636,6 +636,22 @@ export default function FolderPage() {
     });
   };
 
+  // HTML 태그 제거하고 순수 텍스트만 반환 (미리보기용)
+  const stripHtml = (html) => {
+    if (!html) return '';
+    return html
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<\/p>/gi, ' ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   const formatMessage = (content) => {
     if (!content) return '';
     
@@ -854,7 +870,9 @@ export default function FolderPage() {
                     ? `url(${bookmarkImageUrl})` 
                     : `linear-gradient(135deg, ${themeColor}, #111)` 
               }}>
-                <div className="bookmark-preview-overlay"><p>{bookmarkModal.text}</p></div>
+                <div className="bookmark-preview-overlay">
+                  <p dangerouslySetInnerHTML={{ __html: bookmarkModal.text }} />
+                </div>
               </div>
               <div className="form-group">
                 <label>이미지</label>
@@ -1110,7 +1128,7 @@ export default function FolderPage() {
                     onTouchEnd={handleLongPressEnd}
                     onTouchMove={handleLongPressEnd}
                   >
-                    <p>{b.text.slice(0, 40)}...</p>
+                    <p>{stripHtml(b.text).slice(0, 40)}...</p>
                   </div>
                 ))}
                 {bookmarks.length === 0 && <p className="empty">없음</p>}
