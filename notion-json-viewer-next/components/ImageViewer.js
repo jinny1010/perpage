@@ -1,20 +1,23 @@
 export default function ImageViewer({ bookmark, onClose }) {
   if (!bookmark) return null;
 
-  // 마크다운 포맷 처리
+  // 텍스트 포맷 처리 (HTML 태그 유지 + 마크다운 변환)
   const formatText = (text) => {
     if (!text) return '';
     
-    // 이탤릭 처리 (*텍스트* 또는 _텍스트_)
-    let formatted = text
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      .replace(/_([^_]+)_/g, '<em>$1</em>');
+    let formatted = text;
     
-    // 볼드 처리 (**텍스트**)
+    // 마크다운 이탤릭 (*텍스트* 또는 _텍스트_) - 이미 <em>이 아닌 경우만
+    formatted = formatted.replace(/(?<!<)\*([^*<>]+)\*(?!>)/g, '<em>$1</em>');
+    formatted = formatted.replace(/(?<!<)_([^_<>]+)_(?!>)/g, '<em>$1</em>');
+    
+    // 마크다운 볼드 (**텍스트**)
     formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
     
-    // 줄바꿈 처리
-    formatted = formatted.replace(/\n/g, '<br/>');
+    // 줄바꿈 처리 (HTML에 이미 <br>이 없으면)
+    if (!formatted.includes('<br') && !formatted.includes('<p>')) {
+      formatted = formatted.replace(/\n/g, '<br/>');
+    }
     
     return formatted;
   };

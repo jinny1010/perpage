@@ -161,9 +161,17 @@ export default function FolderPage() {
   useEffect(() => {
     const handleSelectionChange = () => {
       const selection = window.getSelection();
-      const text = selection?.toString().trim();
-      if (text && text.length > 0 && selectedPost) {
-        setSelectedText({ text, sourceTitle: selectedPost.title });
+      const plainText = selection?.toString().trim();
+      if (plainText && plainText.length > 0 && selectedPost) {
+        // HTML 포함해서 가져오기
+        let htmlText = plainText;
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const div = document.createElement('div');
+          div.appendChild(range.cloneContents());
+          htmlText = div.innerHTML;
+        }
+        setSelectedText({ text: htmlText, sourceTitle: selectedPost.title });
       }
     };
     document.addEventListener('selectionchange', handleSelectionChange);
@@ -775,8 +783,19 @@ export default function FolderPage() {
             <div className={`chat-messages theme-${theme}`} ref={viewerRef} onScroll={handleScroll}
               onContextMenu={(e) => {
                 const selection = window.getSelection();
-                const t = selection?.toString().trim();
-                if (t) { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, type: 'bookmark', data: { text: t, sourceTitle: selectedPost.title } }); }
+                const plainText = selection?.toString().trim();
+                if (plainText) { 
+                  e.preventDefault(); 
+                  // HTML 포함해서 가져오기
+                  let htmlText = plainText;
+                  if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const div = document.createElement('div');
+                    div.appendChild(range.cloneContents());
+                    htmlText = div.innerHTML;
+                  }
+                  setContextMenu({ x: e.clientX, y: e.clientY, type: 'bookmark', data: { text: htmlText, sourceTitle: selectedPost.title } }); 
+                }
               }}>
               {messages.map((msg, i) => {
                 const isUser = msg.is_user;
